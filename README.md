@@ -58,7 +58,7 @@ Before running module in ant make sure following variables are set:
 	 use this file to override tasks for project needs
    * use `datacut.project.properties.file` (`datacut-extended.properties`) to setup project specific properties  
 	 use this file to override properties for project needs
-   * use `/environment-properties/env.properties` as template for project environments
+   * use `environment-properties/env.properties` as template for project environments
    * use `deployment.topology.file` as template for project environments (to upload deployment topology to avoid running full deployment in ATG BCC)
 
 

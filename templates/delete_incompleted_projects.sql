@@ -1,0 +1,13 @@
+delete from EPUB_PR_HISTORY where project_id in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null);
+delete from EPUB_PROC_HISTORY where process_id in (select process_id from epub_process where project in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null));
+delete from EPUB_PROC_TASKINFO where id in (select process_id from epub_process where project in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null));
+delete from EPUB_IND_WORKFLOW where process_id in (select process_id from epub_process where project in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null));
+delete from EPUB_PROCESS where project in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null);
+delete from AVM_ASSET_LOCK where workspace_id in (select id from avm_devline where name in (select workspace from epub_project where project_id in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null)));
+delete from EPUB_PR_TG_STATUS where PROJECT_ID in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null);
+delete from EPUB_PR_TG_DP_ID where PROJECT_ID in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null);
+delete from EPUB_PR_TG_AP_TS where PROJECT_ID in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null);
+delete from EPUB_DEPLOY_PROJ where PROJECT_ID in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null);
+delete from EPUB_DEP_LOG where DELI_PROJ_IDS in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null);
+delete from EPUB_PROJECT where project_id in (select project_id from epub_project where CHECKED_IN = 0 and STATUS = 0 and COMPLETION_DATE is null);
+delete from EPUB_DEPLOYMENT;

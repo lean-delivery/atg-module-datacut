@@ -1,0 +1,1088 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="datacut" basedir=".">
+	<!-- apply global and project variables -->
+	<property file="${basedir}/environment-properties/${env}.properties"/>
+	<property file="${basedir}/datacut-extended.properties"/>
+	<property file="${basedir}/datacut.properties"/>
+    <import file="${datacut.project.ant.file}" optional="true" />	
+
+	<path id="antclasspath">
+		<fileset dir="${build.lib.dir}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	<path id="ant.contrib.class.path">
+		<fileset dir="${build.lib.dir}">
+			<include name="ant-contrib-1.0b3.jar" />
+		</fileset>
+	</path>
+
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${build.lib.dir}/ant-contrib-1.0b3.jar" />
+	
+	<target name="importFromDump" depends="-getDumpLocation">
+	
+		<for list="${db.schemas_to_import}" param="schema.name" delimiter=","> 
+			<sequential>
+				<setImportProperties schema="@{schema.name}" />
+				<copyDumpFromStorage schema="@{schema.name}" />
+				<verifyDumpFile schema="@{schema.name}" />
+				<generateSQLscript schema="@{schema.name}" />
+				<dropUserContent schema="@{schema.name}" />
+				<midActions schema="@{schema.name}" />
+				<runSQLScript schema="@{schema.name}" />
+				<importSchemaFromDump schema="@{schema.name}" />
+				<deleteDumpFromDbHost schema="@{schema.name}" />
+				<uploadDeploymentTopology schema="@{schema.name}" />
+				<fixAdminPasswords schema="@{schema.name}" /> 
+				<removeIncompletedProjects schema="@{schema.name}" />
+				<postActions schema="@{schema.name}" /> 
+			</sequential>		
+		</for>
+	</target>
+	
+	<target name="exportToDump" depends="-getDumpLocation">
+	
+		<for list="${db.schemas_to_export}" param="schema.name" delimiter=","> 
+			<sequential>
+				<setExportProperties schema="@{schema.name}" /> 
+				<exportSchemaToDump schema="@{schema.name}" /> 
+				<copyDumpToStorage schema="@{schema.name}" />
+				<deleteDumpFromDbHost schema="@{schema.name}" />
+			</sequential>
+		</for>	
+	</target>
+	
+	<target name="importFromDumpRDS">
+		
+		<for list="${db.schemas_to_import}" param="schema.name" delimiter=","> 
+			<sequential>
+				<setImportPropertiesRDS schema="@{schema.name}" />
+				<createDBlink schema="@{schema.name}" />
+				<copyDumpFromStorageRDS schema="@{schema.name}" />
+				<dropUserContent schema="@{schema.name}" />
+				<midActions schema="@{schema.name}" />
+				<importSchemaFromDumpRDS schema="@{schema.name}" />
+				<deleteDumpFromRDS schema="@{schema.name}" />
+				<uploadDeploymentTopology schema="@{schema.name}" />
+				<fixAdminPasswords schema="@{schema.name}" /> 
+				<removeIncompletedProjects schema="@{schema.name}" />
+				<postActions schema="@{schema.name}" />  
+			</sequential>		
+		</for>
+	</target>
+	
+	<target name="exportToDumpRDS">
+			
+		<for list="${db.schemas_to_export}" param="schema.name" delimiter=","> 
+			<sequential>
+				<setExportPropertiesRDS schema="@{schema.name}" /> 
+				<createDBlink schema="@{schema.name}" />
+				<exportSchemaToDumpRDS schema="@{schema.name}" /> 
+				<copyDumpFromRDSToStorage schema="@{schema.name}" />
+				<deleteDumpFromRDS schema="@{schema.name}" />
+			</sequential>
+		</for>	
+	</target>
+	
+	<target name="loadAtgData">
+		<antcall target="unzipAtgData"/>
+	
+		<for list="${bcc.deployment.list}" param="server.name" delimiter=","> 
+			<sequential>			    
+				<syncAtgData server="@{server.name}" />		
+			</sequential>
+		</for>
+		
+		<antcall target="clearEnvDataTempDir"/>
+	</target>
+	
+	<target name="exportAtgData">
+		<antcall target="-runSSHCommand">  
+			<param name="sh.host" value="${storage.server}"/>
+			<param name="sh.user" value="${storage.user}"/>
+			<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+			<param name="ssh.command" value="mkdir -p ${storage.atg-data.dir}/${env}/ATG-Data"/>
+			<param name="fail_on_error" value="true"/> 
+		</antcall>
+	
+		<for list="${bcc.deployment.list}" param="server.name" delimiter=","> 
+			<sequential>			    
+				<getAtgData server="@{server.name}" />		
+			</sequential>
+		</for>
+		<antcall target="zipAtgData"/>
+		<antcall target="clearEnvDataTempDir"/>
+	</target>
+	
+	<scriptdef name="getSchemasList" language="javascript"> 
+        <attribute name="db.configs"/>
+        <attribute name="targetPropertyName"/><![CDATA[
+		    var list = new String(attributes.get('db.configs'))
+			var arr = list.split(",");
+			var result=""
+			var schema=""
+			var i, ii = arr.length;
+            for(i = 0; i < ii; i++) {
+			   schema = arr[i]
+			   if(project.getProperty(schema+".user.remap") !== 'null')
+			   {
+				   result=result + project.getProperty(schema+".user.remap")+":"+ project.getProperty(schema+".db.user");
+				   if(i < (ii-1))
+					 {
+						result=result + ",";
+					 }
+			   }
+			}
+			project.setProperty(attributes.get('targetpropertyname'),result)
+		]]>
+	</scriptdef>
+	
+	<scriptdef name="getQuotesList" language="javascript"> 
+        <attribute name="subject"/>
+        <attribute name="targetPropertyName"/><![CDATA[
+		    var list = new String(attributes.get('subject'))
+			var arr = list.split(",");
+            len = arr.length, i;
+            for(i = 0; i < len; i++ )
+               arr[i] && arr.push(arr[i]);  // copy non-empty values to the end of the array
+               arr.splice(0 , len);  // cut the array and leave only the non-empty values
+
+			var result=""
+			var i, ii = arr.length;
+            for(i = 0; i < ii; i++) {
+               result=result + "'"+arr[i].trim()+"'";
+			   if(i < (ii-1))
+                 {
+                    result=result + ",";
+                 }
+			}
+			project.setProperty(attributes.get('targetpropertyname'),result)
+		]]>
+	</scriptdef>
+	
+	<scriptdef name="getQuotesListEscaped" language="javascript"> 
+        <attribute name="subject"/>
+        <attribute name="targetPropertyName"/><![CDATA[
+		    var list = new String(attributes.get('subject'))
+			var arr = list.split(",");
+            len = arr.length, i;
+            for(i = 0; i < len; i++ )
+               arr[i] && arr.push(arr[i]);  // copy non-empty values to the end of the array
+               arr.splice(0 , len);  // cut the array and leave only the non-empty values
+
+  		    var result=""
+			var i, ii = arr.length;
+            for(i = 0; i < ii; i++) {
+               result=result + "\\'"+arr[i].trim()+"\\'";
+			   if(i < (ii-1))
+                 {
+                    result=result + ",";
+                 }
+			   
+			}
+			project.setProperty(attributes.get('targetpropertyname'),result)
+		]]>
+	</scriptdef>
+	
+	<!-- set variables for impdp -->
+	<macrodef name="setImportProperties">
+		<attribute name="schema" />
+		<sequential>
+			<getSchemasList db.configs="${db.configs}"  targetPropertyName="remap_schema_list" />
+			<!-- since in ant variable must always be defined, setting it to empty value, if it doesn't exist -->
+			<condition property="project.list.of.saved.tables" value="">
+			   <not>  
+				  <isset property="project.list.of.saved.tables"/>
+			   </not>
+			</condition>
+			<condition property="@{schema}.project.list.of.saved.tables" value="">
+			   <not>  
+				  <isset property="@{schema}.project.list.of.saved.tables"/>
+			   </not>
+			</condition>
+			<getQuotesListEscaped subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTablesEscaped"  />
+			<getQuotesList subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTables"  />
+		
+			<if>
+			<equals arg1="${@{schema}.savedTablesEscaped}" arg2="" />
+			<then>
+				<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${tablespace.remap}:${tablespace} DIRECTORY=${dump.dir}"/>
+				
+				<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} exclude=TABLE_STATISTICS logfile=generate_sql_${@{schema}.db.user}.log sqlfile=${@{schema}.db.user}.sql"/>  
+
+				<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log exclude=STATISTICS skip_unusable_indexes=YES content=DATA_ONLY"/>
+			</then>
+			<else>
+				<if>
+				<equals arg1="${initial.db.import}" arg2="true" />
+				<then>
+					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${tablespace.remap}:${tablespace} DIRECTORY=${dump.dir}"/>	
+					
+					<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} exclude=TABLE_STATISTICS logfile=generate_sql_${@{schema}.db.user}.log sqlfile=${@{schema}.db.user}.sql"/>   				
+					
+					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log exclude=STATISTICS skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE_DATA:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot;"/>
+				</then>
+				<else>
+					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${tablespace.remap}:${tablespace} DIRECTORY=${dump.dir}"/>
+					
+					<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} exclude=TABLE_STATISTICS logfile=generate_sql_${@{schema}.db.user}.log exclude=TABLE:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; sqlfile=${@{schema}.db.user}.sql"/>     			
+					
+					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE_DATA:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot;"/>
+				</else>
+				</if>			
+			</else>	
+			</if>
+
+			<property name="sqlplus.run.sql.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};echo exit | ${ORACLE_HOME}/bin/sqlplus ${@{schema}.db.user}/${@{schema}.db.password} &lt;&lt; EOF${line.separator}Set echo on ${line.separator} @${dump.directory}/${@{schema}.db.user}.sql ${line.separator} Set echo off ${line.separator}EOF"/>
+
+		</sequential>
+	</macrodef>
+	
+	<!-- set variables for impdp (RDS) -->
+	<macrodef name="setImportPropertiesRDS">
+		<attribute name="schema" />
+		<sequential>
+			<!-- since in ant variable must always be defined, setting it to empty value, if it doesn't exist -->
+			<condition property="project.list.of.saved.tables" value="">
+			   <not>  
+				  <isset property="project.list.of.saved.tables"/>
+			   </not>
+			</condition>
+			<condition property="@{schema}.project.list.of.saved.tables" value="">
+			   <not>  
+				  <isset property="@{schema}.project.list.of.saved.tables"/>
+			   </not>
+			</condition>
+			<getQuotesListEscaped subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTablesEscaped"  />
+			<getQuotesList subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTables"  />
+			<copy file="${datacut.templates.dir}/saved_tables.par" tofile="${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="EXCLUDED_LIST" value="${@{schema}.savedTables}"/>
+				</replacetokens>
+			</filterchain>
+			</copy>
+		
+			<if>
+			<equals arg1="${@{schema}.savedTablesEscaped}" arg2="" />
+			<then>
+				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${tablespace.remap}:${tablespace} DIRECTORY=${dump.dir} TABLE_EXISTS_ACTION=SKIP"/>
+				
+			</then>
+			<else>
+				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${tablespace.remap}:${tablespace} DIRECTORY=${dump.dir} parfile=${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par TABLE_EXISTS_ACTION=SKIP"/>	 
+			</else>	
+			</if>
+	
+		</sequential>
+	</macrodef>
+	
+	<!-- set variables for exdp -->
+	<macrodef name="setExportProperties">
+		<attribute name="schema" />
+		<sequential>
+			<!-- since in ant variable must always be defined, setting it to empty value, if it doesn't exist -->
+			<condition property="project.list.of.excluded.tables" value="">
+			   <not>  
+				  <isset property="project.list.of.excluded.tables"/>
+			   </not>
+			</condition>
+			<condition property="@{schema}.project.list.of.excluded.tables" value="">
+			   <not>  
+				  <isset property="@{schema}.project.list.of.excluded.tables"/>
+			   </not>
+			</condition>
+			<getQuotesListEscaped subject="${project.list.of.excluded.tables},${@{schema}.project.list.of.excluded.tables}" targetPropertyName="@{schema}.project.excludedTablesEscaped" />
+			<getQuotesList subject="${project.list.of.excluded.tables},${@{schema}.project.list.of.excluded.tables}" targetPropertyName="@{schema}.project.excludedTables"  />	
+			<getQuotesListEscaped subject="${list.of.excluded.tables}" targetPropertyName="@{schema}.excludedTablesEscaped" />
+			<getQuotesList subject="${list.of.excluded.tables}" targetPropertyName="@{schema}.excludedTables" />
+			<getQuotesListEscaped subject="${@{schema}.list.of.excluded.tables}" targetPropertyName="@{schema}.excludedSchemaTablesEscaped" />
+			<getQuotesList subject="${@{schema}.list.of.excluded.tables}" targetPropertyName="@{schema}.excludedSchemaTables" />
+			<copy file="${datacut.templates.dir}/excluded_tables.par" tofile="${datacut.templates.dir}/excluded_tables_${@{schema}.db.user}.par" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="EXCLUDED_LIST" value="${@{schema}.excludedTables}"/>
+					<token key="EXCLUDED_SCHEMA_LIST" value="${@{schema}.excludedSchemaTables}"/>
+					<token key="EXCLUDED_PROJECT_LIST" value="${@{schema}.project.excludedTables}"/>
+				</replacetokens>
+			</filterchain>
+			</copy>
+			
+			<if>
+			<and>
+				<equals arg1="${@{schema}.excludedTablesEscaped}" arg2="" />
+				<equals arg1="${@{schema}.excludedSchemaTablesEscaped}" arg2="" />
+				<equals arg1="${@{schema}.project.excludedTablesEscaped}" arg2="" />
+			</and>
+			<then>
+				<property name="expdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/expdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES "/>
+			</then>
+			<else>
+				<property name="expdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/expdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.excludedTablesEscaped}\)\&quot; EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.excludedSchemaTablesEscaped}\)\&quot; EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.project.excludedTablesEscaped}\)\&quot;"/>
+			</else>
+			</if>
+				
+		</sequential>
+	</macrodef>
+	
+	<!-- set variables for exdp (RDS) -->
+	<macrodef name="setExportPropertiesRDS">
+		<attribute name="schema" />
+		<sequential>
+			<!-- since in ant variable must always be defined, setting it to empty value, if it doesn't exist -->
+			<condition property="project.list.of.excluded.tables" value="">
+			   <not>  
+				  <isset property="project.list.of.excluded.tables"/>
+			   </not>
+			</condition>
+			<condition property="@{schema}.project.list.of.excluded.tables" value="">
+			   <not>  
+				  <isset property="@{schema}.project.list.of.excluded.tables"/>
+			   </not>
+			</condition>
+			<getQuotesListEscaped subject="${project.list.of.excluded.tables},${@{schema}.project.list.of.excluded.tables}" targetPropertyName="@{schema}.project.excludedTablesEscaped" />
+			<getQuotesList subject="${project.list.of.excluded.tables},${@{schema}.project.list.of.excluded.tables}" targetPropertyName="@{schema}.project.excludedTables"  />	
+			<getQuotesListEscaped subject="${list.of.excluded.tables}" targetPropertyName="@{schema}.excludedTablesEscaped" />
+			<getQuotesList subject="${list.of.excluded.tables}" targetPropertyName="@{schema}.excludedTables" />
+			<getQuotesListEscaped subject="${@{schema}.list.of.excluded.tables}" targetPropertyName="@{schema}.excludedSchemaTablesEscaped" />
+			<getQuotesList subject="${@{schema}.list.of.excluded.tables}" targetPropertyName="@{schema}.excludedSchemaTables" />
+			<copy file="${datacut.templates.dir}/excluded_tables.par" tofile="${datacut.templates.dir}/excluded_tables_${@{schema}.db.user}.par" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="EXCLUDED_LIST" value="${@{schema}.excludedTables}"/>
+					<token key="EXCLUDED_SCHEMA_LIST" value="${@{schema}.excludedSchemaTables}"/>
+					<token key="EXCLUDED_PROJECT_LIST" value="${@{schema}.project.excludedTables}"/>
+				</replacetokens>
+			</filterchain>
+			</copy>
+			
+			<if>
+			<and>
+				<equals arg1="${@{schema}.excludedTablesEscaped}" arg2="" />
+				<equals arg1="${@{schema}.excludedSchemaTablesEscaped}" arg2="" />
+				<equals arg1="${@{schema}.project.excludedTablesEscaped}" arg2="" />
+			</and>
+			<then>
+				<property name="expdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES compression=all"/>
+			</then>
+			<else>
+			<property name="expdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES compression=all parfile=${datacut.templates.dir}/excluded_tables_${@{schema}.db.user}.par"/>
+			</else>
+			</if>
+			
+		</sequential>
+		
+		
+	</macrodef>
+	
+	<!-- generate sql script for schema initial ddl -->
+	<macrodef name="generateSQLscript">
+		<attribute name="schema" />
+		<sequential>
+			<antcall target="-runSSHCommand">
+			    <param name="sh.host" value="${db.host}"/>
+				<param name="sh.user" value="${oracle.ssh.user}"/>
+				<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+				<param name="ssh.command" value="${impdp.generate.sql.script.@{schema}}" />
+				<param name="fail_on_error" value="false"/>
+			</antcall> 
+		</sequential>
+	</macrodef>
+		
+	<!-- run sql script -->
+	<macrodef name="runSQLScript">
+		<attribute name="schema" />
+		<sequential>
+			<antcall target="-runSSHCommand">  
+				<param name="sh.host" value="${db.host}"/>
+				<param name="sh.user" value="${oracle.ssh.user}"/>
+				<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+				<param name="ssh.command" value="${sqlplus.run.sql.@{schema}}"/>
+				<param name="fail_on_error" value="true"/> 
+			</antcall> 
+			<antcall target="disableConstraints">
+				<param name="schema.user" value="${@{schema}.db.user}"/>
+				<param name="schema.password" value="${@{schema}.db.password}"/>
+			</antcall>
+		</sequential>	
+    </macrodef>	
+	
+	<!-- clear schema data -->
+	<macrodef name="dropUserContent">
+		<attribute name="schema" />
+		<sequential>
+			<if>
+			<equals arg1="${initial.db.import}" arg2="false" />
+			<then>
+				<echo message="Purging recyclebin under schema ${@{schema}.db.user}"/>
+				<sql
+					driver="oracle.jdbc.driver.OracleDriver"
+					url="${db.url}"
+					userid="${@{schema}.db.user}"
+					password="${@{schema}.db.password}"
+					classpathref="antclasspath"
+					autocommit="true" 
+				>
+					<![CDATA[
+						purge recyclebin
+					]]>
+				</sql>
+				<if>
+				<or>
+					<equals arg1="${@{schema}.savedTables}" arg2="" />
+				</or>
+				<then>
+					<echo message="Truncating schema ${@{schema}.db.user}"/>
+					<sql
+						driver="oracle.jdbc.driver.OracleDriver"
+						url="${db.url}"
+						userid="${@{schema}.db.user}"
+						password="${@{schema}.db.password}"
+						delimiter="/"
+						delimitertype="row"
+						classpathref="antclasspath"
+						src="${datacut.templates.dir}/truncate_schema.sql"/>
+				</then>	
+				<else>
+					<echo message="Drop all objects under schema ${@{schema}.db.user} except tables ${@{schema}.savedTables} "/>
+					<copy file="${datacut.templates.dir}/drop_user_content.sql" tofile="${datacut.templates.dir}/drop_user_content_${@{schema}.db.user}.sql" overwrite="true">
+						<filterchain>
+							<replacetokens>
+								<token key="SAVED_TABLES" value="${@{schema}.savedTables}"/>
+							</replacetokens>
+						</filterchain>
+					</copy>
+					<sql
+						driver="oracle.jdbc.driver.OracleDriver"
+						url="${db.url}"
+						userid="${@{schema}.db.user}"
+						password="${@{schema}.db.password}"
+						delimiter="/"
+						delimitertype="row"
+						classpathref="antclasspath"
+						src="${datacut.templates.dir}/drop_user_content_${@{schema}.db.user}.sql"/>
+				</else>	
+				</if>
+				<!-- since Flyway table schema_version was created in lower case and can't be dropped during 'truncate_schema' step -->
+				<echo message="Dropping schema_version table in ${@{schema}.db.user}"/>
+				<sql
+					driver="oracle.jdbc.driver.OracleDriver"
+					url="${db.url}"
+					userid="${@{schema}.db.user}"
+					password="${@{schema}.db.password}"
+					classpathref="antclasspath"
+					autocommit="true" 
+					onerror="continue"
+				>
+					<![CDATA[
+						drop table "schema_version";
+					]]>
+				</sql>	
+			</then>
+		    </if>			
+		</sequential>
+	</macrodef>
+
+	<macrodef name="importSchemaFromDump"> 
+		<attribute name="schema" />
+		<sequential>
+			<antcall target="-runSSHCommand">
+				<param name="sh.host" value="${db.host}"/>
+				<param name="sh.user" value="${oracle.ssh.user}"/>
+				<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+				<param name="ssh.command" value="${impdp.data.import.@{schema}}" />
+				<param name="fail_on_error" value="false"/>
+			</antcall>   
+			<antcall target="enableConstraints">
+				<param name="schema.user" value="${@{schema}.db.user}"/>
+				<param name="schema.password" value="${@{schema}.db.password}"/>
+			</antcall>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="importSchemaFromDumpRDS"> 
+		<attribute name="schema" />
+		<sequential>
+			<exec executable="impdp" failonerror="false">
+				<arg line="${impdp.@{schema}}" ></arg>
+			</exec>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="exportSchemaToDump"> 
+   	<attribute name="schema" />
+	<sequential>
+		<antcall target="-runSSHCommand">
+			<param name="sh.host" value="${db.host}"/>
+			<param name="sh.user" value="${oracle.ssh.user}"/>
+			<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+			<param name="fail_on_error" value="true"/>
+			<param name="ssh.command" value="${expdp.@{schema}}" />
+		</antcall>   
+	</sequential>
+	</macrodef>
+	
+	<macrodef name="exportSchemaToDumpRDS"> 
+   	<attribute name="schema" />
+	<sequential>
+		<exec executable="expdp" failonerror="true">
+			<arg line="${expdp.@{schema}}" ></arg>
+		</exec>  
+	</sequential>
+	</macrodef>
+	  	
+	<!-- copy dump file from storage to oracle server -->
+	<macrodef name="copyDumpFromStorage"> 
+		<attribute name="schema" />
+		<sequential>
+			<antcall target="-runSSHCommand">  
+				<param name="sh.host" value="${storage.server}"/>
+				<param name="sh.user" value="${storage.user}"/>
+				<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+				<param name="ssh.command" value="rsync -a -r --delete ${storage.dump.directory}/${@{schema}.dump.filename} ${oracle.ssh.user}@${db.host}:${dump.directory}"/>
+				<param name="fail_on_error" value="true"/> 
+			</antcall>
+		</sequential>
+	</macrodef>
+		
+	<!-- copy dump file from storage to oracle RDS -->
+	<macrodef name="copyDumpFromStorageRDS"> 
+		<attribute name="schema" />
+		<sequential> 
+			<for list="${@{schema}.dump.filename}" delimiter="," param="dump">
+			<sequential>	
+					<copy file="${datacut.templates.dir}/delete_dump.sql" tofile="${datacut.templates.dir}/delete_dump_${@{schema}.db.user}.sql" overwrite="true">
+					<filterchain>
+						<replacetokens>
+							<token key="DUMPDIR" value="${dump.dir}"/>
+							<token key="DUMPFILE" value="@{dump}"/>
+						</replacetokens>
+					</filterchain>
+					</copy> 
+					<copy file="${datacut.templates.dir}/copy_dump_to_rds.sql" tofile="${datacut.templates.dir}/copy_dump_to_rds_${@{schema}.db.user}.sql" overwrite="true">
+					<filterchain>
+						<replacetokens>
+							<token key="STORAGE_DUMP_DIR" value="${storage.dump.dir}"/>
+							<token key="DUMPDIR" value="${dump.dir}"/>
+							<token key="DUMPFILE" value="@{dump}"/>
+							<token key="DATABASE_LINK" value="${db.link}"/>
+						</replacetokens>
+					</filterchain>
+					</copy>
+					
+					<!-- delete dump file on target database if it exists --> 
+					<sql
+					driver="oracle.jdbc.driver.OracleDriver"
+					url="${db.url}"
+					userid="${@{schema}.db.user}"
+					password="${@{schema}.db.password}"
+					classpathref="antclasspath"
+					delimiter="/"
+					delimitertype="row"
+					onerror="continue"
+					src="${datacut.templates.dir}/delete_dump_${@{schema}.db.user}.sql" />
+					<sql
+					driver="oracle.jdbc.driver.OracleDriver"
+					url="${storage.db.url}"
+					userid="${storage.db.user}"
+					password="${storage.db.password}"
+					classpathref="antclasspath"
+					delimiter="/"
+					delimitertype="row"
+					src="${datacut.templates.dir}/copy_dump_to_rds_${@{schema}.db.user}.sql" /> 
+			</sequential>
+			</for>		
+		</sequential> 
+	</macrodef>
+	
+	<!-- delete dump on RDS database after importing/exporting -->
+	<macrodef name="deleteDumpFromRDS"> 
+		<attribute name="schema" />
+		<sequential> 
+			<for list="${@{schema}.dump.filename}" delimiter="," param="dump">
+			<sequential>	
+					<copy file="${datacut.templates.dir}/delete_dump.sql" tofile="${datacut.templates.dir}/delete_dump_${@{schema}.db.user}.sql" overwrite="true">
+					<filterchain>
+						<replacetokens>
+							<token key="DUMPDIR" value="${dump.dir}"/>
+							<token key="DUMPFILE" value="@{dump}"/>
+						</replacetokens>
+					</filterchain>
+					</copy>
+					<!-- delete dump file on oracle rds -->
+					<sql
+					driver="oracle.jdbc.driver.OracleDriver"
+					url="${db.url}"
+					userid="${@{schema}.db.user}"
+					password="${@{schema}.db.password}"
+					classpathref="antclasspath"
+					delimiter="/"
+					delimitertype="row"
+					onerror="continue"
+					src="${datacut.templates.dir}/delete_dump_${@{schema}.db.user}.sql" />
+			</sequential>
+			</for>		
+		</sequential> 
+	</macrodef>
+	
+	<!-- copy dump file from oracle RDS to storage to server -->
+	<macrodef name="copyDumpFromRDSToStorage"> 
+		<attribute name="schema" />
+		<sequential> 
+			<for list="${@{schema}.dump.filename}" delimiter="," param="dump">
+			<sequential>
+					<copy file="${datacut.templates.dir}/copy_dump_from_rds.sql" tofile="${datacut.templates.dir}/copy_dump_from_rds_${@{schema}.db.user}.sql" overwrite="true"> 
+					<filterchain>
+						<replacetokens>
+							<token key="STORAGE_DUMP_DIR" value="${storage.dump.dir}"/>
+							<token key="DUMPDIR" value="${dump.dir}"/>
+							<token key="DUMPFILE" value="@{dump}"/>
+							<token key="DATABASE_LINK" value="${db.link}"/>
+						</replacetokens>
+					</filterchain>
+					</copy>
+							
+					<sql
+					driver="oracle.jdbc.driver.OracleDriver"
+					url="${storage.db.url}"
+					userid="${storage.db.user}"
+					password="${storage.db.password}"
+					classpathref="antclasspath"
+					delimiter="/"
+					delimitertype="row"
+					src="${datacut.templates.dir}/copy_dump_from_rds_${@{schema}.db.user}.sql" />  	
+			</sequential>
+			</for>		
+		</sequential> 
+	</macrodef>
+	
+	<!-- create database link from storage database to environment database server -->
+	<macrodef name="createDBlink"> 
+	<attribute name="schema" />
+		<sequential> 
+		<copy file="${datacut.templates.dir}/drop_db_link.sql" tofile="${datacut.templates.dir}/drop_db_link_${env}.sql" overwrite="true">
+			<filterchain>
+				<replacetokens>
+					<token key="DATABASE_LINK" value="${db.link}"/>
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<copy file="${datacut.templates.dir}/create_db_link.sql" tofile="${datacut.templates.dir}/create_db_link_${env}.sql" overwrite="true">
+			<filterchain>
+			<replacetokens>
+				<token key="DATABASE_LINK" value="${db.link}"/>
+				<token key="DB_USER" value="${@{schema}.db.user}"/>
+				<token key="DB_PASSWORD" value="${@{schema}.db.password}"/>
+				<token key="DATABASE_HOST" value="${db.host}"/>
+				<token key="DATABASE_PORT" value="${db.port}"/>
+				<token key="DATABASE_SID" value="${db.sid}"/>
+			</replacetokens>
+			</filterchain>
+		</copy>
+		<!-- drop database link if it exists --> 
+		<sql
+		driver="oracle.jdbc.driver.OracleDriver"
+		url="${storage.db.url}"
+		userid="${storage.db.user}"
+		password="${storage.db.password}"
+		classpathref="antclasspath"
+		delimiter="/"
+		delimitertype="row"
+		onerror="continue"
+		src="${datacut.templates.dir}/drop_db_link_${env}.sql" />
+		
+		<!-- create database link  --> 
+		<sql
+		driver="oracle.jdbc.driver.OracleDriver"
+		url="${storage.db.url}"
+		userid="${storage.db.user}"
+		password="${storage.db.password}"
+		classpathref="antclasspath"
+		delimiter="/"
+		delimitertype="row"
+		src="${datacut.templates.dir}/create_db_link_${env}.sql" />
+		</sequential> 
+	</macrodef>
+	
+	<!-- copy dump file from oracle to storage server and delete on oracle server -->
+	<macrodef name="copyDumpToStorage"> 
+   	<attribute name="schema" />
+	<sequential>
+		<echo message="Copying ${@{schema}.dump.filename} from ${db.host} to ${storage.server}"/>
+		<antcall target="-runSSHCommand">  
+			<param name="sh.host" value="${storage.server}"/>
+			<param name="sh.user" value="${storage.user}"/>
+			<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+			<param name="ssh.command" value="rsync -a -r --delete ${oracle.ssh.user}@${db.host}:${dump.directory}/${@{schema}.dump.filename} ${storage.dump.directory}"/>
+			<param name="fail_on_error" value="true"/> 
+		</antcall>
+	</sequential>
+	</macrodef>
+	
+	<!-- delete dump file on oracle server after importing/exporting -->
+	<macrodef name="deleteDumpFromDbHost"> 
+   	<attribute name="schema" />
+	<sequential>
+		<echo message="Removing ${@{schema}.dump.filename} from ${db.host}"/>
+		<antcall target="-runSSHCommand">  
+			<param name="sh.host" value="${db.host}"/>
+			<param name="sh.user" value="${oracle.ssh.user}"/>
+			<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+			<param name="ssh.command" value="rm -f ${dump.directory}/${@{schema}.dump.filename}"/>
+			<param name="fail_on_error" value="true"/> 
+		</antcall>
+	</sequential>
+	</macrodef>
+ 
+    <!-- disable constaints in schema -->
+	<target name="disableConstraints">		
+		<copy file="${datacut.templates.dir}/disable_constraints.sql" tofile="${datacut.templates.dir}/disable_constraints_${schema.user}.sql" overwrite="true">
+		<filterchain>
+			<replacetokens>
+				<token key="DB_USER" value="${schema.user}"/>
+			</replacetokens>
+		</filterchain>
+		</copy>
+		
+		<sql
+			driver="oracle.jdbc.driver.OracleDriver"
+			url="${db.url}"
+			userid="${schema.user}"
+			password="${schema.password}"
+			classpathref="antclasspath"
+			delimiter="/"
+			delimitertype="row"
+			src="${datacut.templates.dir}/disable_constraints_${schema.user}.sql" /> 
+	</target>
+
+	<!-- enable constaints in schema -->
+	<target name="enableConstraints">		
+		<copy file="${datacut.templates.dir}/enable_constraints.sql" tofile="${datacut.templates.dir}/enable_constraints_${schema.user}.sql" overwrite="true">
+		<filterchain>
+			<replacetokens>
+				<token key="DB_USER" value="${schema.user}"/>
+			</replacetokens>
+		</filterchain>
+		</copy>
+		
+		<sql
+			driver="oracle.jdbc.driver.OracleDriver"
+			url="${db.url}"
+			userid="${schema.user}"
+			password="${schema.password}"
+			classpathref="antclasspath"
+			delimiter="/"
+			delimitertype="row"
+			src="${datacut.templates.dir}/enable_constraints_${schema.user}.sql" />
+	</target>
+			
+	<target name="-runSSHCommand">
+       <sshexec host="${sh.host}"
+         username="${sh.user}"
+		 keyfile="${keyfile}"
+         trust="true"
+		 failonerror="${fail_on_error}"
+         command="${ssh.command}" />
+ 	</target>	
+	
+	<!-- check that dump files are present in dump directory  -->
+    <macrodef name="verifyDumpFile">
+		<attribute name="schema" />
+		<sequential>
+			<antcall target="-runSSHCommand">
+				<param name="sh.host" value="${db.host}"/>
+				<param name="sh.user" value="${oracle.ssh.user}"/>
+				<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+				<param name="ssh.command" value="if [[ -f ${dump.directory}/${@{schema}.dump.filename} ]] ; then exit 0; else echo 'Error: dump file ${dump.directory}/${@{schema}.dump.filename} is not found' ;exit 1 ; fi" />
+			</antcall>	
+		</sequential>
+	</macrodef>
+	
+	<!-- get dump directory value from database -->
+	<target name="-getDumpLocation">
+		<sequential>
+		<sql
+			driver="oracle.jdbc.driver.OracleDriver"
+			url="${db.url}"
+			userid="${pub.db.user}"
+			password="${pub.db.password}"
+			warningproperty="db.fail" errorproperty="db.fail"
+			expandProperties="true" showheaders="false" showtrailers="false" 
+			print="yes" output="temp.properties"
+			classpathref="antclasspath"
+			>
+		  <transaction>
+		  <![CDATA[
+			   select 'dump.directory=' || directory_path from dba_directories where directory_name = '${dump.dir}';
+			]]>
+		  </transaction>
+		  </sql>
+			<if>
+				<equals arg1="${db.fail}" arg2="true"/>
+				<then>
+					<echo	message="Error: Cannot find directory object ${dump.directory}"/>			
+				</then>
+			<else>
+			  <property file="temp.properties" />
+			  <delete file="temp.properties" />
+			  <echo message="Current dump directory's ${dump.dir} location : ${dump.directory}" />
+			</else>		
+			</if>
+		</sequential>
+	</target>
+	
+  <!-- update dyn/admin and bcc password -->
+   <macrodef name="fixAdminPasswords">
+		<attribute name="schema" />
+		<sequential>
+			<if>
+			<equals arg1="${@{schema}.fix.admin.password}" arg2="true"/>
+			<then>
+				<echo message="/dyn/admin password will be changed for schema ${@{schema}.db.user} "/>
+				<sql
+				driver="oracle.jdbc.driver.OracleDriver"
+				url="${db.url}"
+				userid="${@{schema}.db.user}"
+				password="${@{schema}.db.password}"
+				classpathref="antclasspath"
+				expandProperties="true" showheaders="false" showtrailers="false" 
+				print="yes"
+				>
+				  <transaction>
+					  <![CDATA[
+						   update DAS_ACCOUNT set PASSWORD=${dyn.admin.password}, LASTPWDUPDATE=trunc(sysdate) where ACCOUNT_NAME='admin';
+						]]>
+				  </transaction>
+			  </sql>
+			</then>
+			</if>	
+			<if>
+			<equals arg1="${@{schema}.fix.bcc.password}" arg2="true"/>
+			<then>
+				<echo message="BCC password for admin user will be changed for schema ${@{schema}.db.user} "/>
+				<sql
+				driver="oracle.jdbc.driver.OracleDriver"
+				url="${db.url}"
+				userid="${@{schema}.db.user}"
+				password="${@{schema}.db.password}"
+				classpathref="antclasspath"
+				expandProperties="true" showheaders="false" showtrailers="false" 
+				print="yes"
+				>
+				  <transaction>
+					  <![CDATA[
+						   update DPI_USER set PASSWORD=${bcc.admin.password}, PASSWORD_SALT=${bcc.admin.password.salt}, LASTPWDUPDATE=trunc(sysdate) where login ='admin';
+						]]>
+				  </transaction>
+			  </sql>			 
+			</then>
+			</if>
+			<if>
+			<equals arg1="${@{schema}.fix.csc.password}" arg2="true"/>
+			<then>
+				<echo message="CSC password for service user will be changed for schema ${@{schema}.db.user} "/>
+				<sql
+				driver="oracle.jdbc.driver.OracleDriver"
+				url="${db.url}"
+				userid="${@{schema}.db.user}"
+				password="${@{schema}.db.password}"
+				classpathref="antclasspath"
+				expandProperties="true" showheaders="false" showtrailers="false" 
+				print="yes"
+				>
+				  <transaction>
+					  <![CDATA[
+						   update DPI_USER set PASSWORD=${csc.service.password}, PASSWORD_SALT=${csc.service.password.salt}, LASTPWDUPDATE=trunc(sysdate) where login ='service';
+						]]>
+				  </transaction>
+			  </sql>			 
+			</then>
+			</if>			
+		</sequential>
+	</macrodef>
+	
+	<!-- delete in epub_* tables all incompleted projects -->
+	<macrodef name="removeIncompletedProjects">
+		<attribute name="schema" />
+		<sequential>
+			<if>
+			<equals arg1="@{schema}" arg2="pub"/>
+			<then>
+				<echo message="Removing incompleted BCC projects"/>
+				<sql
+				driver="oracle.jdbc.driver.OracleDriver"
+				url="${db.url}"
+				userid="${@{schema}.db.user}"
+				password="${@{schema}.db.password}"
+				classpathref="antclasspath"
+				src="${datacut.templates.dir}/delete_incompleted_projects.sql"/>
+			</then>
+			</if>
+		</sequential>
+	</macrodef>
+	
+	<!-- upload deployment topology for BCC to pub schema -->
+	<macrodef name="uploadDeploymentTopology">
+		<attribute name="schema" />
+		<sequential>
+			<if>
+			<and>
+				<equals arg1="@{schema}" arg2="pub"/>
+				<equals arg1="${initial.db.import}" arg2="true" />
+			</and>
+			<then>
+				<echo message="Uploading deployment topology"/>
+				<sql
+				driver="oracle.jdbc.driver.OracleDriver"
+				url="${db.url}"
+				userid="${@{schema}.db.user}"
+				password="${@{schema}.db.password}"
+				classpathref="antclasspath"
+				src="${deployment.topology.file}"/>
+			</then>
+			</if>
+		</sequential>
+	</macrodef>
+	
+	<!-- upload atg-data to environment -->
+	<macrodef name="syncAtgData">
+		<attribute name="server" />
+		<sequential>
+			<if>
+			<not>
+				<or>
+					<equals arg1="${@{server}.app.server.remap}" arg2="" />
+					<equals arg1="${@{server}.app.server.remap}" arg2="null" />
+				</or>
+			</not>
+			<then>
+				<if>
+				<equals arg1="@{server}" arg2="bcc"/>
+				<then>			 
+					<echo  message="Syncing data to ${atg-data.dir}/servers/${@{server}.app.name}"/>	
+					<antcall target="-runSSHCommand">
+						<param name="sh.host" value="${@{server}.app.host}"/>
+						<param name="sh.user" value="${jboss.ssh.user}"/>
+						<param name="keyfile" value="${jboss.ssh.key}"/>
+						<param name="ssh.command" value="mkdir -p ${atg-data.dir}/servers/${@{server}.app.name}" />
+						<param name="fail_on_error" value="true"/>
+					</antcall> 
+					<antcall target="-runSSHCommand">
+						<param name="sh.host" value="${@{server}.app.host}"/>
+						<param name="sh.user" value="${jboss.ssh.user}"/>
+						<param name="keyfile" value="${jboss.ssh.key}"/>
+						<param name="ssh.command" value="mkdir -p ${atg-data.dir}/Publishing" />
+						<param name="fail_on_error" value="true"/>
+					</antcall>
+					
+					<antcall target="-runSSHCommand">  
+						<param name="sh.host" value="${storage.server}"/>
+						<param name="sh.user" value="${storage.user}"/>
+						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${storage.atg-data.dir}/${env}/ATG-Data/servers/${@{server}.app.server.remap}/ ${jboss.ssh.user}@${@{server}.app.host}:${atg-data.dir}/servers/${@{server}.app.name}/"/>
+						<param name="fail_on_error" value="true"/>
+					</antcall>
+				
+					<echo  message="Syncing data to ${atg-data.dir}/Publishing"/>
+					<antcall target="-runSSHCommand">  
+						<param name="sh.host" value="${storage.server}"/>
+						<param name="sh.user" value="${storage.user}"/>
+						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${storage.atg-data.dir}/${env}/ATG-Data/Publishing/ ${jboss.ssh.user}@${@{server}.app.host}:${atg-data.dir}/Publishing/"/>
+						<param name="fail_on_error" value="true"/> 
+					</antcall> 
+				</then>
+				<else>			
+					<echo  message="Syncing data to ${atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent"/>	
+				    <antcall target="-runSSHCommand">
+						<param name="sh.host" value="${@{server}.app.host}"/>
+						<param name="sh.user" value="${jboss.ssh.user}"/>
+						<param name="keyfile" value="${jboss.ssh.key}"/>
+						<param name="ssh.command" value="mkdir -p ${atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent" />
+						<param name="fail_on_error" value="true"/>
+					</antcall>
+					
+					<antcall target="-runSSHCommand">  
+						<param name="sh.host" value="${storage.server}"/>
+						<param name="sh.user" value="${storage.user}"/>
+						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${storage.atg-data.dir}/${env}/ATG-Data/servers/${@{server}.app.server.remap}/PublishingAgent/ ${jboss.ssh.user}@${@{server}.app.host}:${atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent/"/>
+						<param name="fail_on_error" value="true"/>
+					</antcall> 
+				</else>
+				</if>			
+			</then>
+			</if>			
+		</sequential>
+	</macrodef>
+	
+	<!-- get atg-data from environment to storage server -->
+	<macrodef name="getAtgData">
+		<attribute name="server" />
+		<sequential>
+				<if>
+				<equals arg1="@{server}" arg2="bcc"/>
+				<then>
+					<echo  message="Copying data from ${atg-data.dir}/servers/${@{server}.app.name}"/>
+					<antcall target="-runSSHCommand">  
+						<param name="sh.host" value="${storage.server}"/>
+						<param name="sh.user" value="${storage.user}"/>
+						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+						<param name="ssh.command" value="rsync -a -r --delete --exclude '*.log' --exclude '*.zip' ${jboss.ssh.user}@${@{server}.app.host}:${atg-data.dir}/servers/${@{server}.app.name} ${storage.atg-data.dir}/${env}/ATG-Data/servers"/>
+						<param name="fail_on_error" value="true"/> 
+					</antcall> 
+					<echo  message="Copying data from ${atg-data.dir}/Publishing"/>
+					<antcall target="-runSSHCommand">  
+						<param name="sh.host" value="${storage.server}"/>
+						<param name="sh.user" value="${storage.user}"/>
+						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${jboss.ssh.user}@${@{server}.app.host}:${atg-data.dir}/Publishing ${storage.atg-data.dir}/${env}/ATG-Data"/>
+						<param name="fail_on_error" value="true"/> 
+					</antcall> 	 
+				</then>
+				<else>
+					<echo  message="Copying data from ${atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent"/>
+					<antcall target="-runSSHCommand">  
+						<param name="sh.host" value="${storage.server}"/>
+						<param name="sh.user" value="${storage.user}"/>
+						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${jboss.ssh.user}@${@{server}.app.host}:${atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent ${storage.atg-data.dir}/${env}/ATG-Data/servers/${@{server}.app.name}"/>
+						<param name="fail_on_error" value="true"/> 
+					</antcall>  
+				</else>
+				</if>					
+		</sequential>
+	</macrodef>
+	
+	<target name="zipAtgData">
+		<antcall target="-runSSHCommand">  
+			<param name="sh.host" value="${storage.server}"/>
+			<param name="sh.user" value="${storage.user}"/>
+			<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+			<param name="ssh.command" value="cd ${storage.atg-data.dir}/${env}; zip -r ${storage.atg-data.dir}/${atg-data.archive} *"/>
+			<param name="fail_on_error" value="true"/> 
+		</antcall> 
+	</target>
+	
+	<target name="unzipAtgData">
+		<antcall target="-runSSHCommand">  
+			<param name="sh.host" value="${storage.server}"/>
+			<param name="sh.user" value="${storage.user}"/>
+			<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+			<param name="ssh.command" value="mkdir -p ${storage.atg-data.dir}/${env}; unzip -o ${storage.atg-data.dir}/${atg-data.archive} -d ${storage.atg-data.dir}/${env}"/>
+			<param name="fail_on_error" value="true"/> 
+		</antcall>
+	</target>
+	
+	<!-- clear temporarily directory -->
+	<target name="clearEnvDataTempDir">
+		<antcall target="-runSSHCommand">  
+			<param name="sh.host" value="${storage.server}"/>
+			<param name="sh.user" value="${storage.user}"/>
+			<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+			<param name="ssh.command" value="rm -rf ${storage.atg-data.dir}/${env}"/>
+			<param name="fail_on_error" value="true"/> 
+		</antcall>
+	</target>    
+
+</project>

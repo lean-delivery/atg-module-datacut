@@ -1,5 +1,5 @@
 # Datacut
-=========
+
 
 [![License](https://img.shields.io/badge/license-Apache-green.svg?style=flat)](https://raw.githubusercontent.com/lean-delivery/atg-module-datacut/master/LICENSE)
 

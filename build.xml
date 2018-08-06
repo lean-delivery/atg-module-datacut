@@ -959,19 +959,19 @@
 				<if>
 				<equals arg1="@{server}" arg2="bcc"/>
 				<then>			 
-					<echo  message="Syncing data to ${atg-data.dir}/servers/${@{server}.app.name}"/>	
+					<echo  message="Syncing data to ${@{server}.atg-data.dir}/servers/${@{server}.app.name}"/>	
 					<antcall target="-runSSHCommand">
 						<param name="sh.host" value="${@{server}.app.host}"/>
 						<param name="sh.user" value="${app.ssh.user}"/>
 						<param name="keyfile" value="${app.ssh.key}"/>
-						<param name="ssh.command" value="mkdir -p ${atg-data.dir}/servers/${@{server}.app.name}" />
+						<param name="ssh.command" value="mkdir -p ${@{server}.atg-data.dir}/servers/${@{server}.app.name}" />
 						<param name="fail_on_error" value="true"/>
 					</antcall> 
 					<antcall target="-runSSHCommand">
 						<param name="sh.host" value="${@{server}.app.host}"/>
 						<param name="sh.user" value="${app.ssh.user}"/>
 						<param name="keyfile" value="${app.ssh.key}"/>
-						<param name="ssh.command" value="mkdir -p ${atg-data.dir}/Publishing" />
+						<param name="ssh.command" value="mkdir -p ${@{server}.atg-data.dir}/Publishing" />
 						<param name="fail_on_error" value="true"/>
 					</antcall>
 					
@@ -979,26 +979,26 @@
 						<param name="sh.host" value="${storage.server}"/>
 						<param name="sh.user" value="${storage.user}"/>
 						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
-						<param name="ssh.command" value="rsync -a -r --delete ${storage.atg-data.dir}/${env}/ATG-Data/servers/${@{server}.app.server.remap}/ ${app.ssh.user}@${@{server}.app.host}:${atg-data.dir}/servers/${@{server}.app.name}/"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${storage.atg-data.dir}/${env}/ATG-Data/servers/${@{server}.app.server.remap}/ ${app.ssh.user}@${@{server}.app.host}:${@{server}.atg-data.dir}/servers/${@{server}.app.name}/"/>
 						<param name="fail_on_error" value="true"/>
 					</antcall>
 				
-					<echo  message="Syncing data to ${atg-data.dir}/Publishing"/>
+					<echo  message="Syncing data to ${@{server}.atg-data.dir}/Publishing"/>
 					<antcall target="-runSSHCommand">  
 						<param name="sh.host" value="${storage.server}"/>
 						<param name="sh.user" value="${storage.user}"/>
 						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
-						<param name="ssh.command" value="rsync -a -r --delete ${storage.atg-data.dir}/${env}/ATG-Data/Publishing/ ${app.ssh.user}@${@{server}.app.host}:${atg-data.dir}/Publishing/"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${storage.atg-data.dir}/${env}/ATG-Data/Publishing/ ${app.ssh.user}@${@{server}.app.host}:${@{server}.atg-data.dir}/Publishing/"/>
 						<param name="fail_on_error" value="true"/> 
 					</antcall> 
 				</then>
 				<else>			
-					<echo  message="Syncing data to ${atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent"/>	
+					<echo  message="Syncing data to ${@{server}.atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent"/>	
 				    <antcall target="-runSSHCommand">
 						<param name="sh.host" value="${@{server}.app.host}"/>
 						<param name="sh.user" value="${app.ssh.user}"/>
 						<param name="keyfile" value="${app.ssh.key}"/>
-						<param name="ssh.command" value="mkdir -p ${atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent" />
+						<param name="ssh.command" value="mkdir -p ${@{server}.atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent" />
 						<param name="fail_on_error" value="true"/>
 					</antcall>
 					
@@ -1006,7 +1006,7 @@
 						<param name="sh.host" value="${storage.server}"/>
 						<param name="sh.user" value="${storage.user}"/>
 						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
-						<param name="ssh.command" value="rsync -a -r --delete ${storage.atg-data.dir}/${env}/ATG-Data/servers/${@{server}.app.server.remap}/PublishingAgent/ ${app.ssh.user}@${@{server}.app.host}:${atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent/"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${storage.atg-data.dir}/${env}/ATG-Data/servers/${@{server}.app.server.remap}/PublishingAgent/ ${app.ssh.user}@${@{server}.app.host}:${@{server}.atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent/"/>
 						<param name="fail_on_error" value="true"/>
 					</antcall> 
 				</else>
@@ -1023,30 +1023,30 @@
 				<if>
 				<equals arg1="@{server}" arg2="bcc"/>
 				<then>
-					<echo  message="Copying data from ${atg-data.dir}/servers/${@{server}.app.name}"/>
+					<echo  message="Copying data from ${@{server}.atg-data.dir}/servers/${@{server}.app.name}"/>
 					<antcall target="-runSSHCommand">  
 						<param name="sh.host" value="${storage.server}"/>
 						<param name="sh.user" value="${storage.user}"/>
 						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
-						<param name="ssh.command" value="rsync -a -r --delete --exclude '*.log' --exclude '*.zip' ${app.ssh.user}@${@{server}.app.host}:${atg-data.dir}/servers/${@{server}.app.name} ${storage.atg-data.dir}/${env}/ATG-Data/servers"/>
+						<param name="ssh.command" value="rsync -a -r --delete --exclude '*.log' --exclude '*.zip' ${app.ssh.user}@${@{server}.app.host}:${@{server}.atg-data.dir}/servers/${@{server}.app.name} ${storage.atg-data.dir}/${env}/ATG-Data/servers"/>
 						<param name="fail_on_error" value="true"/> 
 					</antcall> 
-					<echo  message="Copying data from ${atg-data.dir}/Publishing"/>
+					<echo  message="Copying data from ${@{server}.atg-data.dir}/Publishing"/>
 					<antcall target="-runSSHCommand">  
 						<param name="sh.host" value="${storage.server}"/>
 						<param name="sh.user" value="${storage.user}"/>
 						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
-						<param name="ssh.command" value="rsync -a -r --delete ${app.ssh.user}@${@{server}.app.host}:${atg-data.dir}/Publishing ${storage.atg-data.dir}/${env}/ATG-Data"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${app.ssh.user}@${@{server}.app.host}:${@{server}.atg-data.dir}/Publishing ${storage.atg-data.dir}/${env}/ATG-Data"/>
 						<param name="fail_on_error" value="true"/> 
 					</antcall> 	 
 				</then>
 				<else>
-					<echo  message="Copying data from ${atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent"/>
+					<echo  message="Copying data from ${@{server}.atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent"/>
 					<antcall target="-runSSHCommand">  
 						<param name="sh.host" value="${storage.server}"/>
 						<param name="sh.user" value="${storage.user}"/>
 						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
-						<param name="ssh.command" value="rsync -a -r --delete ${app.ssh.user}@${@{server}.app.host}:${atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent ${storage.atg-data.dir}/${env}/ATG-Data/servers/${@{server}.app.name}"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${app.ssh.user}@${@{server}.app.host}:${@{server}.atg-data.dir}/servers/${@{server}.app.name}/PublishingAgent ${storage.atg-data.dir}/${env}/ATG-Data/servers/${@{server}.app.name}"/>
 						<param name="fail_on_error" value="true"/> 
 					</antcall>  
 				</else>

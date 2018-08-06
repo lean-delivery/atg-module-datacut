@@ -79,9 +79,9 @@ ant -lib <path_to_build.lib.dir_directory> exportAtgData
  - `env` - source environment
  - `atg-data.archive` - archive name (default **ATG-Data.zip**)
  - `storage.atg-data.dir` - directory on storage server for saving ATG-Data archive (default **/opt/datacut/data**)
- - `jboss.ssh.user` - user to connect to application servers vis SSH (default **jboss**)
+ - `app.ssh.user` - user to connect to application servers vis SSH
  - `bcc.deployment.list` - list of application servers for exporting (default **bcc,store,aux,report,preview**)
- - `atg-data.dir` - ATG-Data directory on application servers (e.g. **<jboss_home>/ATG-Data**)
+ - `atg-data.dir` - ATG-Data directory on application servers (e.g. **<app_home>/ATG-Data**)
 
 For each application server in list `bcc.deployment.list`  must be set hostname and application name, e.g.
 
@@ -238,9 +238,9 @@ ant -lib <path_to_build.lib.dir_directory> loadAtgData
  - `env` - target environment
  - `atg-data.archive` - archive name (default **ATG-Data.zip**)
  - `storage.atg-data.dir` - directory on storage server for saving ATG-Data archive (default **/opt/datacut/data**)
- - `jboss.ssh.user` - user to connect to application servers vis SSH (default **jboss**)
+ - `app.ssh.user` - user to connect to application servers vis SSH
  - `bcc.deployment.list` - list of application servers for exporting (default **bcc,store,aux,report,preview**)
- - `atg-data.dir` - ATG-Data directory on application servers (e.g. **<jboss_home>/ATG-Data**)
+ - `atg-data.dir` - ATG-Data directory on application servers (e.g. **<app_home>/ATG-Data**)
 
 For each application server in list `bcc.deployment.list`  must be set hostname and application name, e.g.
 

@@ -25,16 +25,16 @@ Ant project supports 2 options:
 ## Supported Oracle Commerce products
 --------------
 
-ATG     | Database                  | Application Server                 | OS        |
-------- | ------------------------- |----------------------------------- | --------- |
-11.1    | Oracle 11g (RDS/non-RDS)  | JBoss 6.1.0 EAP                    | Centos 6  |
-11.2    | Oracle 12c                | JBoss 6.1.0 EAP, JBoss 6.4.0 EAP   | Centos 6  |
+ATG         | Database                              | Application Server      | OS        |
+----------- | ------------------------------------- |------------------------ | --------- |
+10.x, 11.x  | Oracle 11g, Oracle 12c (RDS/non-RDS)  | JBoss, Weblogic         | Centos 6  |
+
 
 ## Requirements
 ------------------------
 
 ```
-Ant version - 1.9.4
+Minimal Ant version - 1.9.4
 ```
 
 For running datacut next libraries are required (stored in lib directory):
@@ -89,11 +89,9 @@ For each application server in list `bcc.deployment.list`  must be set hostname 
 ```
 bcc.app.host=host1.example.com
 bcc.app.name=<app_name>
-bcc.rmi.port=<app_port>
 
 aux.app.host=host1.example.com
 aux.app.name=<app_name>
-aux.rmi.port=<app_port>
 ```
 
 ##### Steps in target exportAtgData for each application server in `bcc.deployment.list`
@@ -248,11 +246,9 @@ For each application server in list `bcc.deployment.list`  must be set hostname 
 ```
 bcc.app.host=host1.example.com
 bcc.app.name=<app_name>
-bcc.rmi.port=<app_port>
 
 aux.app.host=host1.example.com
 aux.app.name=<app_name>
-aux.rmi.port=<app_port>
 ```
 
 ##### Steps in target loadAtgData for each application server in `bcc.deployment.list`
@@ -402,7 +398,7 @@ grant IMP_FULL_DATABASE TO <schema_name>;
  - `tablespace.remap` - user's tablespace name on source environment (default **USERS**)
  - `dyn.admin.password` - hashed dyn/admin admin password
  - `<schema_type>.fix.bcc.password` - to update bcc admin password (**true** for pub schema)
- - ``<schema_type>.fix.admin.password` - to update dyn/amin admin password (**true** for pub, core, agent, prv schemas)
+ - `<schema_type>.fix.admin.password` - to update dyn/amin admin password (**true** for pub, core, agent, prv schemas)
  - `bcc.admin.password` - hashed bcc admin password
  - `bcc.admin.password.salt` - hashed bcc admin password salt
  - `csc.service.password` - hashed csc service password (if CSC is installed)

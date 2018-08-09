@@ -25,16 +25,16 @@ Ant project supports 2 options:
 ## Supported Oracle Commerce products
 --------------
 
-ATG     | Database                  | Application Server                 | OS        |
-------- | ------------------------- |----------------------------------- | --------- |
-11.1    | Oracle 11g (RDS/non-RDS)  | JBoss 6.1.0 EAP                    | Centos 6  |
-11.2    | Oracle 12c                | JBoss 6.1.0 EAP, JBoss 6.4.0 EAP   | Centos 6  |
+ATG         | Database (RDS/non-RDS)   | Application Server      | OS        |
+----------- | ------------------------ |------------------------ | --------- |
+10.x, 11.x  | Oracle 11g, Oracle 12c   | JBoss, Weblogic         | Centos 6  |
+
 
 ## Requirements
 ------------------------
 
 ```
-Ant version - 1.9.4
+Minimal Ant version - 1.9.4
 ```
 
 For running datacut next libraries are required (stored in lib directory):
@@ -79,20 +79,19 @@ ant -lib <path_to_build.lib.dir_directory> exportAtgData
  - `env` - source environment
  - `atg-data.archive` - archive name (default **ATG-Data.zip**)
  - `storage.atg-data.dir` - directory on storage server for saving ATG-Data archive (default **/opt/datacut/data**)
- - `jboss.ssh.user` - user to connect to application servers vis SSH (default **jboss**)
+ - `app.ssh.user` - user to connect to application servers vis SSH
  - `bcc.deployment.list` - list of application servers for exporting (default **bcc,store,aux,report,preview**)
- - `atg-data.dir` - ATG-Data directory on application servers (e.g. **<jboss_home>/ATG-Data**)
+ - `atg-data.dir` - ATG-Data directory on application servers (e.g. **<app_home>/ATG-Data**)  
+   in case of different locations set <app>.atg-data.dir for each application server
 
 For each application server in list `bcc.deployment.list`  must be set hostname and application name, e.g.
 
 ```
 bcc.app.host=host1.example.com
 bcc.app.name=<app_name>
-bcc.rmi.port=<app_port>
 
 aux.app.host=host1.example.com
 aux.app.name=<app_name>
-aux.rmi.port=<app_port>
 ```
 
 ##### Steps in target exportAtgData for each application server in `bcc.deployment.list`
@@ -128,7 +127,7 @@ ant -lib <path_to_build.lib.dir_directory> exportToDumpRDS
 ```
 grant execute on dbms_datapump to <schema_name>;
 grant execute on dbms_file_transfer to <schema_name>;
-grant read,write on directory data_pump_dir to <schema_name>;
+grant read,write on directory <dump.dir> to <schema_name>;
 ```
 
 ###### Parameters for exporting dumps
@@ -182,7 +181,7 @@ ant -lib <path_to_build.lib.dir_directory> exportToDump
 ###### Required grants for ATG schemas
 
 ```
-grant READ,WRITE ON DIRECTORY data_pump_dir to <schema_name>;
+grant read,write on directory <dump.dir> to <schema_name>;
 grant EXP_FULL_DATABASE TO <schema_name>;
 ```
 
@@ -238,20 +237,18 @@ ant -lib <path_to_build.lib.dir_directory> loadAtgData
  - `env` - target environment
  - `atg-data.archive` - archive name (default **ATG-Data.zip**)
  - `storage.atg-data.dir` - directory on storage server for saving ATG-Data archive (default **/opt/datacut/data**)
- - `jboss.ssh.user` - user to connect to application servers vis SSH (default **jboss**)
+ - `app.ssh.user` - user to connect to application servers vis SSH
  - `bcc.deployment.list` - list of application servers for exporting (default **bcc,store,aux,report,preview**)
- - `atg-data.dir` - ATG-Data directory on application servers (e.g. **<jboss_home>/ATG-Data**)
+ - `atg-data.dir` - ATG-Data directory on application servers (e.g. **<app_home>/ATG-Data**)
 
 For each application server in list `bcc.deployment.list`  must be set hostname and application name, e.g.
 
 ```
 bcc.app.host=host1.example.com
 bcc.app.name=<app_name>
-bcc.rmi.port=<app_port>
 
 aux.app.host=host1.example.com
 aux.app.name=<app_name>
-aux.rmi.port=<app_port>
 ```
 
 ##### Steps in target loadAtgData for each application server in `bcc.deployment.list`
@@ -293,7 +290,7 @@ ant -lib <path_to_build.lib.dir_directory> importFromDumpRDS
 ```
 grant execute on dbms_datapump to <schema_name>;
 grant execute on dbms_file_transfer to <schema_name>;
-grant read,write on directory data_pump_dir to <schema_name>;
+grant read,write on directory <dump.dir> to <schema_name>;
 ```
 
 ###### Parameters for importing dumps
@@ -380,7 +377,7 @@ ant -lib <path_to_build.lib.dir_directory> importFromDump
 ###### Required grants for ATG schemas
 
 ```
-grant READ,WRITE ON DIRECTORY data_pump_dir to <schema_name>;
+grant read,write on directory <dump.dir> to <schema_name>;
 grant IMP_FULL_DATABASE TO <schema_name>;
 ```
 
@@ -401,7 +398,7 @@ grant IMP_FULL_DATABASE TO <schema_name>;
  - `tablespace.remap` - user's tablespace name on source environment (default **USERS**)
  - `dyn.admin.password` - hashed dyn/admin admin password
  - `<schema_type>.fix.bcc.password` - to update bcc admin password (**true** for pub schema)
- - ``<schema_type>.fix.admin.password` - to update dyn/amin admin password (**true** for pub, core, agent, prv schemas)
+ - `<schema_type>.fix.admin.password` - to update dyn/amin admin password (**true** for pub, core, agent, prv schemas)
  - `bcc.admin.password` - hashed bcc admin password
  - `bcc.admin.password.salt` - hashed bcc admin password salt
  - `csc.service.password` - hashed csc service password (if CSC is installed)

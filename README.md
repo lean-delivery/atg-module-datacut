@@ -25,9 +25,9 @@ Ant project supports 2 options:
 ## Supported Oracle Commerce products
 --------------
 
-ATG         | Database                              | Application Server      | OS        |
------------ | ------------------------------------- |------------------------ | --------- |
-10.x, 11.x  | Oracle 11g, Oracle 12c (RDS/non-RDS)  | JBoss, Weblogic         | Centos 6  |
+ATG         | Database (RDS/non-RDS)   | Application Server      | OS        |
+----------- | ------------------------ |------------------------ | --------- |
+10.x, 11.x  | Oracle 11g, Oracle 12c   | JBoss, Weblogic         | Centos 6  |
 
 
 ## Requirements
@@ -127,7 +127,7 @@ ant -lib <path_to_build.lib.dir_directory> exportToDumpRDS
 ```
 grant execute on dbms_datapump to <schema_name>;
 grant execute on dbms_file_transfer to <schema_name>;
-grant read,write on directory data_pump_dir to <schema_name>;
+grant read,write on directory <dump.dir> to <schema_name>;
 ```
 
 ###### Parameters for exporting dumps
@@ -181,7 +181,7 @@ ant -lib <path_to_build.lib.dir_directory> exportToDump
 ###### Required grants for ATG schemas
 
 ```
-grant READ,WRITE ON DIRECTORY data_pump_dir to <schema_name>;
+grant read,write on directory <dump.dir> to <schema_name>;
 grant EXP_FULL_DATABASE TO <schema_name>;
 ```
 
@@ -290,7 +290,7 @@ ant -lib <path_to_build.lib.dir_directory> importFromDumpRDS
 ```
 grant execute on dbms_datapump to <schema_name>;
 grant execute on dbms_file_transfer to <schema_name>;
-grant read,write on directory data_pump_dir to <schema_name>;
+grant read,write on directory <dump.dir> to <schema_name>;
 ```
 
 ###### Parameters for importing dumps
@@ -377,7 +377,7 @@ ant -lib <path_to_build.lib.dir_directory> importFromDump
 ###### Required grants for ATG schemas
 
 ```
-grant READ,WRITE ON DIRECTORY data_pump_dir to <schema_name>;
+grant read,write on directory <dump.dir> to <schema_name>;
 grant IMP_FULL_DATABASE TO <schema_name>;
 ```
 

@@ -22,6 +22,15 @@ Ant project supports 2 options:
     * import database data from dump files
 
 
+## General schema
+
+### For RDS databases
+@import "datacut - (RDS).svg"
+
+### For non-RDS databases
+@import "datacut - (non-RDS).svg"
+	
+
 ## Supported Oracle Commerce products
 --------------
 

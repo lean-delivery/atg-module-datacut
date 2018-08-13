@@ -25,10 +25,12 @@ Ant project supports 2 options:
 ## General schema
 
 ### For RDS databases
-@import "datacut - (RDS).svg"
+
+@import "RDS.svg"
 
 ### For non-RDS databases
-@import "datacut - (non-RDS).svg"
+
+@import "non-RDS.svg"
 	
 
 ## Supported Oracle Commerce products

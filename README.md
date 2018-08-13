@@ -81,17 +81,17 @@ ant -lib <path_to_build.lib.dir_directory> exportAtgData
  - `storage.atg-data.dir` - directory on storage server for saving ATG-Data archive (default **/opt/datacut/data**)
  - `app.ssh.user` - user to connect to application servers vis SSH
  - `bcc.deployment.list` - list of application servers for exporting (default **bcc,store,aux,report,preview**)
- - `atg-data.dir` - ATG-Data directory on application servers (e.g. **<app_home>/ATG-Data**)  
-   in case of different locations set <app>.atg-data.dir for each application server
 
 For each application server in list `bcc.deployment.list`  must be set hostname and application name, e.g.
 
 ```
 bcc.app.host=host1.example.com
 bcc.app.name=<app_name>
+bcc.atg-data.dir=<atg-data.dir>
 
 aux.app.host=host1.example.com
 aux.app.name=<app_name>
+aux.atg-data.dir=<atg-data.dir>
 ```
 
 ##### Steps in target exportAtgData for each application server in `bcc.deployment.list`
@@ -239,16 +239,18 @@ ant -lib <path_to_build.lib.dir_directory> loadAtgData
  - `storage.atg-data.dir` - directory on storage server for saving ATG-Data archive (default **/opt/datacut/data**)
  - `app.ssh.user` - user to connect to application servers vis SSH
  - `bcc.deployment.list` - list of application servers for exporting (default **bcc,store,aux,report,preview**)
- - `atg-data.dir` - ATG-Data directory on application servers (e.g. **<app_home>/ATG-Data**)
 
 For each application server in list `bcc.deployment.list`  must be set hostname and application name, e.g.
 
 ```
 bcc.app.host=host1.example.com
 bcc.app.name=<app_name>
+bcc.atg-data.dir=<atg-data.dir>
 
 aux.app.host=host1.example.com
 aux.app.name=<app_name>
+aux.atg-data.dir=<atg-data.dir>
+
 ```
 
 ##### Steps in target loadAtgData for each application server in `bcc.deployment.list`
@@ -455,5 +457,5 @@ Apache2
 
 ## Authors
 
-  - Anastacia Maletskaya  
-    <anastacia_maletskaya@lean-delivery.com>
+  - Lean Delivery team  
+    <team@lean-delivery.com>

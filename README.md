@@ -37,9 +37,9 @@ Ant project supports 2 options:
 ## Supported Oracle Commerce products
 --------------
 
-ATG         | Database (RDS/non-RDS)   | Application Server      | OS        |
------------ | ------------------------ |------------------------ | --------- |
-10.x, 11.x  | Oracle 11g, Oracle 12c   | JBoss, Weblogic         | Centos 6  |
+ATG         | Database (RDS/non-RDS)   | Application Server      | OS          |
+----------- | ------------------------ |------------------------ | ----------  |
+10.x, 11.x  | Oracle 11g, Oracle 12c   | JBoss, Weblogic         | Centos 6/7  |
 
 
 ## Requirements

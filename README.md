@@ -368,7 +368,7 @@ If you want to add additional project tables for saving during dump importing, s
 It's essential to set schema names remap of source environment, e.g.
 
 ```
-pub.user.remap=<source_bcc_schema>
+pub.user.remap=<source_pub_schema>
 core.user.remap=<source_core_schema>
 ```
 
@@ -456,7 +456,7 @@ If you want to add additional project tables for saving during dump importing, s
 It's essential to set schema names remap of source environment, e.g.
 
 ```
-pub.user.remap=<source_bcc_schema>
+pub.user.remap=<source_pub_schema>
 core.user.remap=<source_core_schema>
 ```
 

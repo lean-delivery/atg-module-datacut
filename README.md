@@ -24,12 +24,12 @@ Ant project supports 2 options:
 
 ## General schema
 
-### For RDS databases
+### Datacut overview for RDS databases
 
 ![Alt text](RDS.svg "Datacut overview for RDS database")
 
 
-### For non-RDS databases
+### Datacut overview for non-RDS databases
 
 ![Alt text](non-RDS.svg "Datacut overview for non-RDS database")
 

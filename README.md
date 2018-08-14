@@ -463,6 +463,10 @@ core.user.remap=<source_core_schema>
 If `initial.db.import` set to `true` set `deployment.topology.file` to environment deployment topology sql file
 
 
+#### Alight IDs in EPUB tables
+
+[How to align targets](Align_target_id.pdf)
+
 ## License
 
 Apache2

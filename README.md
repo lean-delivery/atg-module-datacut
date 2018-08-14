@@ -26,12 +26,13 @@ Ant project supports 2 options:
 
 ### For RDS databases
 
-@import "RDS.svg"
+![Alt text](RDS.svg "Datacut overview for RDS database")
+
 
 ### For non-RDS databases
 
-@import "non-RDS.svg"
-	
+![Alt text](non-RDS.svg "Datacut overview for non-RDS database")
+
 
 ## Supported Oracle Commerce products
 --------------

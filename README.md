@@ -82,7 +82,6 @@ Before running module in ant make sure following variables are set:
 
 
 ```
-cd datacut
 ant -lib <path_to_build.lib.dir_directory> exportAtgData
 ```
 
@@ -130,7 +129,6 @@ CREATE DIRECTORY DB_DUMPDIR AS **/opt/datacut/db_dumps**  (same directory should
 
 
 ```
-cd datacut
 ant -lib <path_to_build.lib.dir_directory> exportToDumpRDS
 ```
 
@@ -186,7 +184,6 @@ If you want to add additional project tables to exclude during exporting data to
 ##### non-RDS database
 
 ```
-cd datacut
 ant -lib <path_to_build.lib.dir_directory> exportToDump
 ```
 
@@ -240,7 +237,6 @@ If you want to add additional project tables to exclude during exporting data to
 
 
 ```
-cd datacut
 ant -lib <path_to_build.lib.dir_directory> loadAtgData
 ```
 
@@ -295,7 +291,6 @@ ATG Schemas must be created in target database preliminarily
 
 
 ```
-cd datacut
 ant -lib <path_to_build.lib.dir_directory> importFromDumpRDS
 ```
 
@@ -384,7 +379,6 @@ ATG Schemas must be created in target database preliminarily
 
 
 ```
-cd datacut
 ant -lib <path_to_build.lib.dir_directory> importFromDump
 ```
 

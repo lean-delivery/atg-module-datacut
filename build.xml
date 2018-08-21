@@ -200,6 +200,11 @@
 				  <isset property="@{schema}.project.list.of.saved.tables"/>
 			   </not>
 			</condition>
+			<condition property="@{schema}.list.of.saved.tables" value="">
+			   <not>  
+				  <isset property="@{schema}.list.of.saved.tables"/>
+			   </not>
+			</condition>
 			<getQuotesListEscaped subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTablesEscaped"  />
 			<getQuotesList subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTables"  />
 		
@@ -253,6 +258,11 @@
 				  <isset property="@{schema}.project.list.of.saved.tables"/>
 			   </not>
 			</condition>
+			<condition property="@{schema}.list.of.saved.tables" value="">
+			   <not>  
+				  <isset property="@{schema}.list.of.saved.tables"/>
+			   </not>
+			</condition>
 			<getQuotesListEscaped subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTablesEscaped"  />
 			<getQuotesList subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTables"  />
 			<copy file="${datacut.templates.dir}/saved_tables.par" tofile="${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par" overwrite="true">
@@ -290,6 +300,11 @@
 			<condition property="@{schema}.project.list.of.excluded.tables" value="">
 			   <not>  
 				  <isset property="@{schema}.project.list.of.excluded.tables"/>
+			   </not>
+			</condition>
+			<condition property="@{schema}.list.of.excluded.tables" value="">
+			   <not>  
+				  <isset property="@{schema}.list.of.excluded.tables"/>
 			   </not>
 			</condition>
 			<getQuotesListEscaped subject="${project.list.of.excluded.tables},${@{schema}.project.list.of.excluded.tables}" targetPropertyName="@{schema}.project.excludedTablesEscaped" />
@@ -338,6 +353,11 @@
 			<condition property="@{schema}.project.list.of.excluded.tables" value="">
 			   <not>  
 				  <isset property="@{schema}.project.list.of.excluded.tables"/>
+			   </not>
+			</condition>
+			<condition property="@{schema}.list.of.excluded.tables" value="">
+			   <not>  
+				  <isset property="@{schema}.list.of.excluded.tables"/>
 			   </not>
 			</condition>
 			<getQuotesListEscaped subject="${project.list.of.excluded.tables},${@{schema}.project.list.of.excluded.tables}" targetPropertyName="@{schema}.project.excludedTablesEscaped" />

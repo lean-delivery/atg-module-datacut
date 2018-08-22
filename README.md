@@ -200,7 +200,7 @@ grant EXP_FULL_DATABASE TO <schema_name>;
  - `db.host` - database host
  - `db.port` - database port
  - `db.sid` - database sid
- - `oracle.ssh.user` - user to connect to database server via SSH
+ - `oracle.ssh.user` - user to connect to database server via SSH (should be in **dba** group)
  - `dump.dir` - oracle data pump directory (default **DATA_PUMP_DIR**)
  - `db.schemas_to_export` - list of db schemas for exporting to dump
  - `ORACLE_HOME` - oracle home directory on source environment
@@ -397,7 +397,7 @@ grant IMP_FULL_DATABASE TO <schema_name>;
  - `db.sid` - database sid
  - `dump.dir` - oracle directory to export dumps (default **DATA_PUMP_DIR**)
  - `db.configs` - list of ATG schemas on target environment
- - `oracle.ssh.user` - user to connect to database server via SSH
+ - `oracle.ssh.user` - user to connect to database server via SSH (should be in **dba** group)
  - `db.schemas_to_import` - list of db schemas for importing from dumps
  - `initial.db.import` - set to **true** in case of initial import on new environment (default **false**)
  - `ORACLE_HOME` - oracle home directory on source environment

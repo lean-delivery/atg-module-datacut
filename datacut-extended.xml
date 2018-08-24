@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="datacut-extended" basedir=".">
+
+<!-- This is an example datacut-extended.xml for datacut project specific tasks. Don't delete fuke if you don't have any project specific steps -->
+
+<macrodef name="postActions">
+	<attribute name="schema" />
+	<sequential>
+		<!-- put here project specific post actions; if you don't have any please leave as is -->
+	</sequential>
+</macrodef>
+
+<macrodef name="midActions">
+	<attribute name="schema" />
+	<sequential>
+		<!-- put here project specific middle (intermediate) actions (between schema dropping and dump importing); if you don't have any please leave as is -->
+	</sequential>
+</macrodef>
+	
+</project>

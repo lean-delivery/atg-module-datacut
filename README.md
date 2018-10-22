@@ -331,17 +331,20 @@ grant read,write on directory <dump.dir> to <schema_name>;
  - `list.of.saved.tables` - list of saved tables during dump importing on target database for all schemas
  - `<schema>.list.of.saved.tables` - list of saved tables during dump importing on target database for defined schema
 
-For each database schema in list `db.schemas_to_import` must be set schema name, password and dump file, e.g.
+For each database schema in list `db.schemas_to_import` must be set schema name, password, tablespace(if it's differ from common `tablespace`) and dump file, e.g.
 
 ```
 pub.db.user=<schema_name>
 pub.db.password=<schema_password>
+pub.tablespace=<pub_tablespace>
 pub.dump.filename=<schema_name>.dmp
 
 core.db.user=<schema_name>
 core.db.password=<schema_password>
+core.tablespace=<pub_tablespace>
 core.dump.filename=<schema_name>.dmp
 ```
+In case tablespace for every schema isn't defined or is empty, common tablespace `tablespace` is used.
 
 If you want to add additional project tables for saving during dump importing, set parameters:
 
@@ -360,12 +363,15 @@ If you want to add additional project tables for saving during dump importing, s
  - update admin user password for bcc (**fixAdminPasswords**)
  - remove incompleted BCC projects in pub schema (**removeIncompletedProjects**)
 
-It's essential to set schema names remap of source environment, e.g.
+It's essential to set schema names and tablespace names remap of source environment, e.g.
 
 ```
 pub.user.remap=<source_pub_schema>
+pub.tablespace.remap=<source_pub_tablespace>
 core.user.remap=<source_core_schema>
+core.tablespace.remap=<source_core_tablespace>
 ```
+In case remap tablespace for every schema isn't defined or is empty, common `tablespace.remap` is used.
 
 If `initial.db.import` set to `true` set `deployment.topology.file` to environment deployment topology sql file
 
@@ -420,12 +426,15 @@ For each database schema in list `db.schemas_to_import` must be set schema name,
 ```
 pub.db.user=<schema_name>
 pub.db.password=<schema_password>
+pub.tablespace=<pub_tablespace>
 pub.dump.filename=<schema_name>.dmp
 
 core.db.user=<schema_name>
 core.db.password=<schema_password>
+core.tablespace=<pub_tablespace>
 core.dump.filename=<schema_name>.dmp
 ```
+In case tablespace for every schema isn't defined or is empty, common tablespace `tablespace` is used.
 
 If you want to add additional project tables for saving during dump importing, set parameters:
 
@@ -451,8 +460,11 @@ It's essential to set schema names remap of source environment, e.g.
 
 ```
 pub.user.remap=<source_pub_schema>
+pub.tablespace.remap=<source_pub_tablespace>
 core.user.remap=<source_core_schema>
+core.tablespace.remap=<source_core_tablespace>
 ```
+In case remap tablespace for every schema isn't defined or is empty, common `tablespace.remap` is used.
 
 If `initial.db.import` set to `true` set `deployment.topology.file` to environment deployment topology sql file
 

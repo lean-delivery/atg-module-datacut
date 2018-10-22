@@ -206,20 +206,14 @@
 			   </not>
 			</condition>
 			<condition property="@{schema}.tablespace" value="${tablespace}">
-			  <or>
 			   <not>  
 				  <isset property="@{schema}.tablespace"/>
 			   </not>
-			   <equals arg1="@{schema}.tablespace" arg2=""/>
-			  </or>
 			</condition>
 			<condition property="@{schema}.tablespace.remap" value="${tablespace.remap}">
-			  <or>
 			   <not>  
 				  <isset property="@{schema}.tablespace.remap"/>
 			   </not>
-			   <equals arg1="@{schema}.tablespace.remap" arg2=""/>
-			  </or>
 			</condition>
 
 			

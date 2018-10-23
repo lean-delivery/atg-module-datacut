@@ -300,10 +300,7 @@
 				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} TABLE_EXISTS_ACTION=SKIP"/>	
 			</then>
 			<else>
-				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} parfile=${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par TABLE_EXISTS_ACTION=SKIP"/>	 			
-			</then>
-			<else>
-				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} parfile=${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par TABLE_EXISTS_ACTION=SKIP"/>	 
+				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} parfile=${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par TABLE_EXISTS_ACTION=SKIP"/>	 				 
 			</else>	
 			</if>
 	

@@ -205,13 +205,24 @@
 				  <isset property="@{schema}.list.of.saved.tables"/>
 			   </not>
 			</condition>
+			<condition property="@{schema}.tablespace" value="${tablespace}">
+			   <not>  
+				  <isset property="@{schema}.tablespace"/>
+			   </not>
+			</condition>
+			<condition property="@{schema}.tablespace.remap" value="${tablespace.remap}">
+			   <not>  
+				  <isset property="@{schema}.tablespace.remap"/>
+			   </not>
+			</condition>
+
 			<getQuotesListEscaped subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTablesEscaped"  />
 			<getQuotesList subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTables"  />
 		
 			<if>
 			<equals arg1="${@{schema}.savedTablesEscaped}" arg2="" />
 			<then>
-				<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${tablespace.remap}:${tablespace} DIRECTORY=${dump.dir}"/>
+				<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>
 				
 				<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log sqlfile=${@{schema}.db.user}.sql"/>  
 
@@ -221,14 +232,13 @@
 				<if>
 				<equals arg1="${initial.db.import}" arg2="true" />
 				<then>
-					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${tablespace.remap}:${tablespace} DIRECTORY=${dump.dir}"/>	
-					
+					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>					
 					<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log sqlfile=${@{schema}.db.user}.sql"/>   				
 					
 					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE_DATA:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot;"/>
 				</then>
 				<else>
-					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${tablespace.remap}:${tablespace} DIRECTORY=${dump.dir}"/>
+					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>
 					
 					<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log exclude=TABLE:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; sqlfile=${@{schema}.db.user}.sql"/>     			
 					
@@ -263,6 +273,17 @@
 				  <isset property="@{schema}.list.of.saved.tables"/>
 			   </not>
 			</condition>
+			<condition property="@{schema}.tablespace" value="${tablespace}">
+			   <not>  
+				  <isset property="@{schema}.tablespace"/>
+			   </not>
+			</condition>
+			<condition property="@{schema}.tablespace.remap" value="${tablespace.remap}">
+			   <not>  
+				  <isset property="@{schema}.tablespace.remap"/>
+			   </not>
+			</condition>
+
 			<getQuotesListEscaped subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTablesEscaped"  />
 			<getQuotesList subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTables"  />
 			<copy file="${datacut.templates.dir}/saved_tables.par" tofile="${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par" overwrite="true">
@@ -276,11 +297,13 @@
 			<if>
 			<equals arg1="${@{schema}.savedTablesEscaped}" arg2="" />
 			<then>
-				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${tablespace.remap}:${tablespace} DIRECTORY=${dump.dir} TABLE_EXISTS_ACTION=SKIP"/>
-				
+				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} TABLE_EXISTS_ACTION=SKIP"/>	
 			</then>
 			<else>
-				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${tablespace.remap}:${tablespace} DIRECTORY=${dump.dir} parfile=${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par TABLE_EXISTS_ACTION=SKIP"/>	 
+				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} parfile=${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par TABLE_EXISTS_ACTION=SKIP"/>	 			
+			</then>
+			<else>
+				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} parfile=${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par TABLE_EXISTS_ACTION=SKIP"/>	 
 			</else>	
 			</if>
 	

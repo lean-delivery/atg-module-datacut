@@ -344,7 +344,7 @@ core.db.password=<schema_password>
 core.tablespace=<pub_tablespace>
 core.dump.filename=<schema_name>.dmp
 ```
-In case tablespace for every schema isn't defined or is empty, common tablespace `tablespace` is used.
+In case tablespace for every schema isn't defined, common tablespace `tablespace` is used.
 
 If you want to add additional project tables for saving during dump importing, set parameters:
 
@@ -371,7 +371,7 @@ pub.tablespace.remap=<source_pub_tablespace>
 core.user.remap=<source_core_schema>
 core.tablespace.remap=<source_core_tablespace>
 ```
-In case remap tablespace for every schema isn't defined or is empty, common `tablespace.remap` is used.
+In case remap tablespace for every schema isn't defined, common `tablespace.remap` is used.
 
 If `initial.db.import` set to `true` set `deployment.topology.file` to environment deployment topology sql file
 
@@ -434,7 +434,7 @@ core.db.password=<schema_password>
 core.tablespace=<pub_tablespace>
 core.dump.filename=<schema_name>.dmp
 ```
-In case tablespace for every schema isn't defined or is empty, common tablespace `tablespace` is used.
+In case tablespace for every schema isn't defined, common tablespace `tablespace` is used.
 
 If you want to add additional project tables for saving during dump importing, set parameters:
 
@@ -464,7 +464,7 @@ pub.tablespace.remap=<source_pub_tablespace>
 core.user.remap=<source_core_schema>
 core.tablespace.remap=<source_core_tablespace>
 ```
-In case remap tablespace for every schema isn't defined or is empty, common `tablespace.remap` is used.
+In case remap tablespace for every schema isn't defined, common `tablespace.remap` is used.
 
 If `initial.db.import` set to `true` set `deployment.topology.file` to environment deployment topology sql file
 

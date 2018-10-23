@@ -275,6 +275,17 @@
 				  <isset property="@{schema}.list.of.saved.tables"/>
 			   </not>
 			</condition>
+			<condition property="@{schema}.tablespace" value="${tablespace}">
+			   <not>  
+				  <isset property="@{schema}.tablespace"/>
+			   </not>
+			</condition>
+			<condition property="@{schema}.tablespace.remap" value="${tablespace.remap}">
+			   <not>  
+				  <isset property="@{schema}.tablespace.remap"/>
+			   </not>
+			</condition>
+
 			<getQuotesListEscaped subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTablesEscaped"  />
 			<getQuotesList subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTables"  />
 			<copy file="${datacut.templates.dir}/saved_tables.par" tofile="${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par" overwrite="true">

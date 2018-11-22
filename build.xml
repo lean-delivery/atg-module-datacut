@@ -350,10 +350,10 @@
 				<equals arg1="${@{schema}.project.excludedTablesEscaped}" arg2="" />
 			</and>
 			<then>
-				<property name="expdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/expdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES compression=all"/>
+				<property name="expdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/expdp ${@{schema}.db.user}/\'${@{schema}.db.password}\' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES compression=all"/>
 			</then>
 			<else>
-				<property name="expdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/expdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES compression=all EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.excludedTablesEscaped}\)\&quot; EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.excludedSchemaTablesEscaped}\)\&quot; EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.project.excludedTablesEscaped}\)\&quot;"/>
+				<property name="expdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/expdp ${@{schema}.db.user}/'\${@{schema}.db.password}\' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES compression=all EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.excludedTablesEscaped}\)\&quot; EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.excludedSchemaTablesEscaped}\)\&quot; EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.project.excludedTablesEscaped}\)\&quot;"/>
 			</else>
 			</if>
 				

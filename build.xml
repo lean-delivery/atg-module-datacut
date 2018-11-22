@@ -222,7 +222,7 @@
 			<if>
 			<equals arg1="${@{schema}.savedTablesEscaped}" arg2="" />
 			<then>
-				<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>
+				<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/'${@{schema}.db.password}' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>
 				
 				<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log sqlfile=${@{schema}.db.user}.sql"/>  
 
@@ -232,13 +232,13 @@
 				<if>
 				<equals arg1="${initial.db.import}" arg2="true" />
 				<then>
-					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>					
+					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/'${@{schema}.db.password}' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>					
 					<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log sqlfile=${@{schema}.db.user}.sql"/>   				
 					
 					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE_DATA:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot;"/>
 				</then>
 				<else>
-					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/${@{schema}.db.password} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>
+					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/'${@{schema}.db.password}' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>
 					
 					<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log exclude=TABLE:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; sqlfile=${@{schema}.db.user}.sql"/>     			
 					
@@ -248,7 +248,7 @@
 			</else>	
 			</if>
 
-			<property name="sqlplus.run.sql.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};echo exit | ${ORACLE_HOME}/bin/sqlplus ${@{schema}.db.user}/${@{schema}.db.password} &lt;&lt; EOF${line.separator}Set echo on ${line.separator} @${dump.directory}/${@{schema}.db.user}.sql ${line.separator} Set echo off ${line.separator}EOF"/>
+			<property name="sqlplus.run.sql.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};echo exit | ${ORACLE_HOME}/bin/sqlplus ${@{schema}.db.user}/'${@{schema}.db.password}' &lt;&lt; EOF${line.separator}Set echo on ${line.separator} @${dump.directory}/${@{schema}.db.user}.sql ${line.separator} Set echo off ${line.separator}EOF"/>
 
 		</sequential>
 	</macrodef>
@@ -350,10 +350,10 @@
 				<equals arg1="${@{schema}.project.excludedTablesEscaped}" arg2="" />
 			</and>
 			<then>
-				<property name="expdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/expdp ${@{schema}.db.user}/\'${@{schema}.db.password}\' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES compression=all"/>
+				<property name="expdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/expdp ${@{schema}.db.user}/'${@{schema}.db.password}' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES compression=all"/>
 			</then>
 			<else>
-				<property name="expdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/expdp ${@{schema}.db.user}/'\${@{schema}.db.password}\' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES compression=all EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.excludedTablesEscaped}\)\&quot; EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.excludedSchemaTablesEscaped}\)\&quot; EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.project.excludedTablesEscaped}\)\&quot;"/>
+				<property name="expdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/expdp ${@{schema}.db.user}/'${@{schema}.db.password}' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.db.user} DIRECTORY=${dump.dir} REUSE_DUMPFILES=YES compression=all EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.excludedTablesEscaped}\)\&quot; EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.excludedSchemaTablesEscaped}\)\&quot; EXCLUDE=TABLE_DATA:\&quot;IN \(${@{schema}.project.excludedTablesEscaped}\)\&quot;"/>
 			</else>
 			</if>
 				

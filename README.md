@@ -330,7 +330,8 @@ grant read,write on directory <dump.dir> to <schema_name>;
  - `agent.fix.csc.password` - to update bcc admin password (**true** for agent schema)
  - `list.of.saved.tables` - list of saved tables during dump importing on target database for all schemas
  - `<schema>.list.of.saved.tables` - list of saved tables during dump importing on target database for defined schema
-
+ - `workflows` - comma separated workflow names
+ 
 For each database schema in list `db.schemas_to_import` must be set schema name, password, tablespace(if it's differ from common `tablespace`) and dump file, e.g.
 
 ```
@@ -362,7 +363,8 @@ If you want to add additional project tables for saving during dump importing, s
  - update admin user password for dyn/admin (**fixAdminPasswords**)
  - update admin user password for bcc (**fixAdminPasswords**)
  - remove incompleted BCC projects in pub schema (**removeIncompletedProjects**)
-
+ - update workflow if `workflows` variable is set. Get workflow files from `wdl.folder` (**updateWDL**)
+ 
 It's essential to set schema names and tablespace names remap of source environment, e.g.
 
 ```
@@ -420,6 +422,7 @@ grant IMP_FULL_DATABASE TO <schema_name>;
  - `agent.fix.csc.password` - to update bcc admin password (**true** for agent schema)
  - `list.of.saved.tables` - list of saved tables during dump importing on target database for all schemas
  - `<schema>.list.of.saved.tables` - list of saved tables during dump importing on target database for defined schema
+ - `workflows` - comma separated workflow names
 
 For each database schema in list `db.schemas_to_import` must be set schema name, password and dump file, e.g.
 
@@ -455,7 +458,8 @@ If you want to add additional project tables for saving during dump importing, s
  - update admin user password for bcc (**fixAdminPasswords**)
  - update service user password for csc (**fixAdminPasswords**)
  - remove incompleted BCC projects in pub schema (**removeIncompletedProjects**)
-
+ - update workflow if `workflows` variable is set. Get workflow files from `wdl.folder` (**updateWDL**)
+ 
 It's essential to set schema names remap of source environment, e.g.
 
 ```

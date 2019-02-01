@@ -987,7 +987,7 @@
 		</sequential>
 	</macrodef>
 	
-	<!-- upload workflow wdl for BCC to pub schema -->
+	<!-- upload workflow wdl for pub schema -->
 	<macrodef name="updateWDL" >
 		<attribute name="schema" />
 		<sequential>

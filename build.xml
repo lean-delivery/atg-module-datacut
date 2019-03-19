@@ -421,20 +421,13 @@
 	<macrodef name="generateSQLscript">
 		<attribute name="schema" />
 		<sequential>
-			<antcallback target="-runSSHCommand" return="result">
+			<antcall target="-runSSHCommand" >
 			    <param name="sh.host" value="${db.host}"/>
 				<param name="sh.user" value="${oracle.ssh.user}"/>
 				<param name="keyfile" value="${oracle.ssh.key}"/>
 				<param name="ssh.command" value="${impdp.generate.sql.script.@{schema}}" />
 				<param name="fail_on_error" value="false"/>
-			</antcallback> 
-		     <fail message="exit code is not in List => [${list_of_codes}]">
-			  <condition>
-			   <not>
-				<contains string="${list_of_codes}" substring="${result}"/>
-			   </not>
-			  </condition>
-			 </fail>	
+			</antcall> 
 		</sequential>
 	</macrodef>
 		
@@ -833,9 +826,17 @@
 		 failonerror="${fail_on_error}"
          command="${ssh.command}"
          resultproperty="result"/>
-		 <echo message="Remote command ${ssh.command} finished with exit code ${result}"/>
+         <fail message="exit code is not in List => [${list_of_codes}]">
+           <condition>
+              <and>
+                 <equals arg1="${fail_on_error}" arg2="false"/>
+               <not>
+                  <contains string="${list_of_codes}" substring="${result}"/>
+               </not>
+              </and>
+          </condition>
+         </fail>
  	</target>	
-	
 	<!-- check that dump files are present in dump directory  -->
     <macrodef name="verifyDumpFile">
 		<attribute name="schema" />

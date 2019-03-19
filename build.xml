@@ -831,7 +831,8 @@
 		 keyfile="${keyfile}"
          trust="true"
 		 failonerror="${fail_on_error}"
-         command="${ssh.command}" />
+         command="${ssh.command}"
+         resultproperty="result"/>
  	</target>	
 	
 	<!-- check that dump files are present in dump directory  -->

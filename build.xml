@@ -833,6 +833,7 @@
 		 failonerror="${fail_on_error}"
          command="${ssh.command}"
          resultproperty="result"/>
+		 <echo message="Remote command ${ssh.command} finished with exit code ${result}"/>
  	</target>	
 	
 	<!-- check that dump files are present in dump directory  -->

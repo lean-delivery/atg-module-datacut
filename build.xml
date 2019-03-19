@@ -4,6 +4,8 @@
 	<property file="${basedir}/environment-properties/${env}.properties"/>
 	<property file="${basedir}/datacut-extended.properties"/>
 	<property file="${basedir}/datacut.properties"/>
+	<property name="list_of_codes" value="0,5"/>
+	
     <import file="${datacut.project.ant.file}" optional="true" />	
 
 	<path id="antclasspath">
@@ -419,13 +421,20 @@
 	<macrodef name="generateSQLscript">
 		<attribute name="schema" />
 		<sequential>
-			<antcall target="-runSSHCommand">
+			<antcallback target="-runSSHCommand" return="result">
 			    <param name="sh.host" value="${db.host}"/>
 				<param name="sh.user" value="${oracle.ssh.user}"/>
 				<param name="keyfile" value="${oracle.ssh.key}"/>
 				<param name="ssh.command" value="${impdp.generate.sql.script.@{schema}}" />
 				<param name="fail_on_error" value="false"/>
-			</antcall> 
+			</antcallback> 
+		     <fail message="exit code is not in List => [${list_of_codes}]">
+			  <condition>
+			   <not>
+				<contains string="${list_of_codes}" substring="${result}"/>
+			   </not>
+			  </condition>
+			 </fail>	
 		</sequential>
 	</macrodef>
 		

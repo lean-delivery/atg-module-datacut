@@ -4,6 +4,8 @@
 	<property file="${basedir}/environment-properties/${env}.properties"/>
 	<property file="${basedir}/datacut-extended.properties"/>
 	<property file="${basedir}/datacut.properties"/>
+	<property name="list_of_codes" value="0,5"/>
+	
     <import file="${datacut.project.ant.file}" optional="true" />	
 
 	<path id="antclasspath">
@@ -419,7 +421,7 @@
 	<macrodef name="generateSQLscript">
 		<attribute name="schema" />
 		<sequential>
-			<antcall target="-runSSHCommand">
+			<antcall target="-runSSHCommand" >
 			    <param name="sh.host" value="${db.host}"/>
 				<param name="sh.user" value="${oracle.ssh.user}"/>
 				<param name="keyfile" value="${oracle.ssh.key}"/>
@@ -822,9 +824,19 @@
 		 keyfile="${keyfile}"
          trust="true"
 		 failonerror="${fail_on_error}"
-         command="${ssh.command}" />
+         command="${ssh.command}"
+         resultproperty="result"/>
+         <fail message="exit code is not in List => [${list_of_codes}]">
+           <condition>
+              <and>
+                 <equals arg1="${fail_on_error}" arg2="false"/>
+               <not>
+                  <contains string="${list_of_codes}" substring="${result}"/>
+               </not>
+              </and>
+          </condition>
+         </fail>
  	</target>	
-	
 	<!-- check that dump files are present in dump directory  -->
     <macrodef name="verifyDumpFile">
 		<attribute name="schema" />

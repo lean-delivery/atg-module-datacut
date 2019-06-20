@@ -217,7 +217,7 @@
 				  <isset property="@{schema}.tablespace.remap"/>
 			   </not>
 			</condition>
-			<condition peropty="@{schema}.import.flags" value="">
+			<condition property="@{schema}.import.flags" value="">
 				<not>
 					<isset property="@{schema}.import.flags"/>
 				</not>
@@ -290,7 +290,7 @@
 				  <isset property="@{schema}.tablespace.remap"/>
 			   </not>
 			</condition>
-			<condition peropty="@{schema}.import.flags" value="">
+			<condition property="@{schema}.import.flags" value="">
 				<not>
 					<isset property="@{schema}.import.flags"/>
 				</not>

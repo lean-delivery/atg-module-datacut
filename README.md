@@ -351,6 +351,14 @@ If you want to add additional project tables for saving during dump importing, s
  - `project.list.of.saved.tables` - for all schemas in list db.schemas_to_import
  - `<schema_type>.project.list.of.saved.tables` - for <schema_type> schema (e.g. pub.project.list.of.saved.tables)
 
+If you want to add additional import flags then set parameter:
+```
+pub.import.flags=<some_flags>
+core.import.flags=<some_flags>
+```
+
+Example usage of `core.import.flags` is `core.import.flags="TRANSFORM=OID:N"`
+
 ###### Steps in target importFromDumpRDS for each schema in `db.schemas_to_import`
 
  - create/recreate database link from storage XE to target RDS database (**createDBlink**)
@@ -440,6 +448,14 @@ If you want to add additional project tables for saving during dump importing, s
 
  - `project.list.of.saved.tables` - for all schemas in list db.schemas_to_import
  - `<schema_type>.project.list.of.saved.tables` - for <schema_type> schema (e.g. pub.project.list.of.saved.tables)
+
+If you want to add additional import flags then set parameter:
+```
+pub.import.flags=<some_flags>
+core.import.flags=<some_flags>
+```
+
+Example usage of `core.import.flags` is `core.import.flags="TRANSFORM=OID:N"`
 
 ###### Steps in target importFromDump for each schema in `db.schemas_to_import`
 

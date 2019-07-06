@@ -54,6 +54,9 @@ For running datacut next libraries are required (stored in lib directory):
 + ant-contrib-1.0b3.jar
 + jsch-0.1.54.jar
 + ojdbc6.jar
++ groovy-2.5.5.jar
++ groovy-ant-2.5.5.jar
++ groovy-sql-2.5.5.jar 
 
 ## Global variables
 Before running module in ant make sure following variables are set:

@@ -20,6 +20,7 @@
 	</path>
 
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${build.lib.dir}/ant-contrib-1.0b3.jar" />
+	<taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpath="${build.lib.dir}" />
 	
 	<target name="importFromDump" depends="-getDumpLocation">
 	
@@ -37,6 +38,7 @@
 				<uploadDeploymentTopology schema="@{schema.name}" />
 				<fixAdminPasswords schema="@{schema.name}" /> 
 				<removeIncompletedProjects schema="@{schema.name}" />
+				<updateWDL schema="@{schema.name}" /> 
 				<postActions schema="@{schema.name}" /> 
 			</sequential>		
 		</for>
@@ -68,6 +70,7 @@
 				<uploadDeploymentTopology schema="@{schema.name}" />
 				<fixAdminPasswords schema="@{schema.name}" /> 
 				<removeIncompletedProjects schema="@{schema.name}" />
+				<updateWDL schema="@{schema.name}" /> 
 				<postActions schema="@{schema.name}" />  
 			</sequential>		
 		</for>
@@ -1001,6 +1004,43 @@
 				password="${@{schema}.db.password}"
 				classpathref="antclasspath"
 				src="${deployment.topology.file}"/>
+			</then>
+			</if>
+		</sequential>
+	</macrodef>
+	
+	<!-- upload workflow wdl for pub schema -->
+	<macrodef name="updateWDL" >
+		<attribute name="schema" />
+		<sequential>
+			<if>
+				<equals arg1="@{schema}" arg2="pub"/>
+			<then>
+				<groovy>
+					<![CDATA[
+					import groovy.sql.Sql
+			
+					workflows = properties['workflows']
+					if (workflows) {
+						println("Workflows to update: ${workflows}")
+						url = properties['db.url']
+						userid = properties['pub.db.user']
+						password = properties['pub.db.password']
+						wdlFolder = properties['wdl.folder']
+						sql = Sql.newInstance(url,userid, password, "oracle.jdbc.pool.OracleDataSource")
+						
+						workflows.split(',').each{
+							updateQuery = "UPDATE EPUB_WORKFLOW_INFO set WDL = (?) where workflow_name like '%${it}.wdl%'"
+							String wdl = new File("${wdlFolder}/${it}.wdl").text
+							wdlBytes = new ByteArrayInputStream(wdl.getBytes()) 
+							ps = sql.connection.prepareStatement(updateQuery) 			
+							ps.setBinaryStream(1, wdlBytes) 
+							ps.executeUpdate()
+						}
+						sql.close()
+					}
+					]]>
+				</groovy>
 			</then>
 			</if>
 		</sequential>

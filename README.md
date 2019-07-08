@@ -54,6 +54,9 @@ For running datacut next libraries are required (stored in lib directory):
 + ant-contrib-1.0b3.jar
 + jsch-0.1.54.jar
 + ojdbc6.jar
++ groovy-2.5.5.jar
++ groovy-ant-2.5.5.jar
++ groovy-sql-2.5.5.jar 
 
 ## Global variables
 Before running module in ant make sure following variables are set:
@@ -330,7 +333,8 @@ grant read,write on directory <dump.dir> to <schema_name>;
  - `agent.fix.csc.password` - to update bcc admin password (**true** for agent schema)
  - `list.of.saved.tables` - list of saved tables during dump importing on target database for all schemas
  - `<schema>.list.of.saved.tables` - list of saved tables during dump importing on target database for defined schema
-
+ - `workflows` - comma separated workflow names
+ 
 For each database schema in list `db.schemas_to_import` must be set schema name, password, tablespace(if it's differ from common `tablespace`) and dump file, e.g.
 
 ```
@@ -370,7 +374,8 @@ Example usage of `core.import.flags` is `core.import.flags="TRANSFORM=OID:N"`
  - update admin user password for dyn/admin (**fixAdminPasswords**)
  - update admin user password for bcc (**fixAdminPasswords**)
  - remove incompleted BCC projects in pub schema (**removeIncompletedProjects**)
-
+ - update workflow if `workflows` variable is set. Get workflow files from `wdl.folder` (**updateWDL**)
+ 
 It's essential to set schema names and tablespace names remap of source environment, e.g.
 
 ```
@@ -428,6 +433,7 @@ grant IMP_FULL_DATABASE TO <schema_name>;
  - `agent.fix.csc.password` - to update bcc admin password (**true** for agent schema)
  - `list.of.saved.tables` - list of saved tables during dump importing on target database for all schemas
  - `<schema>.list.of.saved.tables` - list of saved tables during dump importing on target database for defined schema
+ - `workflows` - comma separated workflow names
 
 For each database schema in list `db.schemas_to_import` must be set schema name, password and dump file, e.g.
 
@@ -471,7 +477,8 @@ Example usage of `core.import.flags` is `core.import.flags="TRANSFORM=OID:N"`
  - update admin user password for bcc (**fixAdminPasswords**)
  - update service user password for csc (**fixAdminPasswords**)
  - remove incompleted BCC projects in pub schema (**removeIncompletedProjects**)
-
+ - update workflow if `workflows` variable is set. Get workflow files from `wdl.folder` (**updateWDL**)
+ 
 It's essential to set schema names remap of source environment, e.g.
 
 ```

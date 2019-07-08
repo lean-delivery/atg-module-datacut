@@ -4,6 +4,8 @@
 	<property file="${basedir}/environment-properties/${env}.properties"/>
 	<property file="${basedir}/datacut-extended.properties"/>
 	<property file="${basedir}/datacut.properties"/>
+	<property name="list_of_codes" value="0,5"/>
+	
     <import file="${datacut.project.ant.file}" optional="true" />	
 
 	<path id="antclasspath">
@@ -18,6 +20,7 @@
 	</path>
 
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${build.lib.dir}/ant-contrib-1.0b3.jar" />
+	<taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpath="${build.lib.dir}" />
 	
 	<target name="importFromDump" depends="-getDumpLocation">
 	
@@ -35,6 +38,7 @@
 				<uploadDeploymentTopology schema="@{schema.name}" />
 				<fixAdminPasswords schema="@{schema.name}" /> 
 				<removeIncompletedProjects schema="@{schema.name}" />
+				<updateWDL schema="@{schema.name}" /> 
 				<postActions schema="@{schema.name}" /> 
 			</sequential>		
 		</for>
@@ -66,6 +70,7 @@
 				<uploadDeploymentTopology schema="@{schema.name}" />
 				<fixAdminPasswords schema="@{schema.name}" /> 
 				<removeIncompletedProjects schema="@{schema.name}" />
+				<updateWDL schema="@{schema.name}" /> 
 				<postActions schema="@{schema.name}" />  
 			</sequential>		
 		</for>
@@ -215,6 +220,11 @@
 				  <isset property="@{schema}.tablespace.remap"/>
 			   </not>
 			</condition>
+			<condition property="@{schema}.import.flags" value="">
+				<not>
+					<isset property="@{schema}.import.flags"/>
+				</not>
+			</condition>
 
 			<getQuotesListEscaped subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTablesEscaped"  />
 			<getQuotesList subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTables"  />
@@ -226,7 +236,7 @@
 				
 				<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log sqlfile=${@{schema}.db.user}.sql"/>  
 
-				<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log  skip_unusable_indexes=YES content=DATA_ONLY"/>
+				<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log  skip_unusable_indexes=YES content=DATA_ONLY ${@{schema}.import.flags}"/>
 			</then>
 			<else>
 				<if>
@@ -235,14 +245,14 @@
 					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/'${@{schema}.db.password}' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>					
 					<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log sqlfile=${@{schema}.db.user}.sql"/>   				
 					
-					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE_DATA:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot;"/>
+					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE_DATA:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; ${@{schema}.import.flags}"/>
 				</then>
 				<else>
 					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/'${@{schema}.db.password}' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>
 					
 					<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log exclude=TABLE:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; sqlfile=${@{schema}.db.user}.sql"/>     			
 					
-					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE_DATA:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot;"/>
+					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE_DATA:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; ${@{schema}.import.flags}"/>
 				</else>
 				</if>			
 			</else>	
@@ -283,6 +293,11 @@
 				  <isset property="@{schema}.tablespace.remap"/>
 			   </not>
 			</condition>
+			<condition property="@{schema}.import.flags" value="">
+				<not>
+					<isset property="@{schema}.import.flags"/>
+				</not>
+			</condition>
 
 			<getQuotesListEscaped subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTablesEscaped"  />
 			<getQuotesList subject="${list.of.saved.tables},${@{schema}.list.of.saved.tables},${project.list.of.saved.tables},${@{schema}.project.list.of.saved.tables}" targetPropertyName="@{schema}.savedTables"  />
@@ -297,10 +312,10 @@
 			<if>
 			<equals arg1="${@{schema}.savedTablesEscaped}" arg2="" />
 			<then>
-				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} TABLE_EXISTS_ACTION=SKIP"/>	
+				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} TABLE_EXISTS_ACTION=SKIP ${@{schema}.import.flags}"/>
 			</then>
 			<else>
-				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} parfile=${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par TABLE_EXISTS_ACTION=SKIP"/>	 				 
+				<property name="impdp.@{schema}" value="${@{schema}.db.user}/${@{schema}.db.password}@${db.host}:${db.port}/${db.sid} DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${@{schema}.user.remap}:${@{schema}.db.user} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir} parfile=${datacut.templates.dir}/saved_tables_${@{schema}.db.user}.par TABLE_EXISTS_ACTION=SKIP ${@{schema}.import.flags}"/>
 			</else>	
 			</if>
 	
@@ -419,7 +434,7 @@
 	<macrodef name="generateSQLscript">
 		<attribute name="schema" />
 		<sequential>
-			<antcall target="-runSSHCommand">
+			<antcall target="-runSSHCommand" >
 			    <param name="sh.host" value="${db.host}"/>
 				<param name="sh.user" value="${oracle.ssh.user}"/>
 				<param name="keyfile" value="${oracle.ssh.key}"/>
@@ -822,9 +837,19 @@
 		 keyfile="${keyfile}"
          trust="true"
 		 failonerror="${fail_on_error}"
-         command="${ssh.command}" />
+         command="${ssh.command}"
+         resultproperty="result"/>
+         <fail message="exit code is not in List => [${list_of_codes}]">
+           <condition>
+              <and>
+                 <equals arg1="${fail_on_error}" arg2="false"/>
+               <not>
+                  <contains string="${list_of_codes}" substring="${result}"/>
+               </not>
+              </and>
+          </condition>
+         </fail>
  	</target>	
-	
 	<!-- check that dump files are present in dump directory  -->
     <macrodef name="verifyDumpFile">
 		<attribute name="schema" />
@@ -979,6 +1004,43 @@
 				password="${@{schema}.db.password}"
 				classpathref="antclasspath"
 				src="${deployment.topology.file}"/>
+			</then>
+			</if>
+		</sequential>
+	</macrodef>
+	
+	<!-- upload workflow wdl for pub schema -->
+	<macrodef name="updateWDL" >
+		<attribute name="schema" />
+		<sequential>
+			<if>
+				<equals arg1="@{schema}" arg2="pub"/>
+			<then>
+				<groovy>
+					<![CDATA[
+					import groovy.sql.Sql
+			
+					workflows = properties['workflows']
+					if (workflows) {
+						println("Workflows to update: ${workflows}")
+						url = properties['db.url']
+						userid = properties['pub.db.user']
+						password = properties['pub.db.password']
+						wdlFolder = properties['wdl.folder']
+						sql = Sql.newInstance(url,userid, password, "oracle.jdbc.pool.OracleDataSource")
+						
+						workflows.split(',').each{
+							updateQuery = "UPDATE EPUB_WORKFLOW_INFO set WDL = (?) where workflow_name like '%${it}.wdl%'"
+							String wdl = new File("${wdlFolder}/${it}.wdl").text
+							wdlBytes = new ByteArrayInputStream(wdl.getBytes()) 
+							ps = sql.connection.prepareStatement(updateQuery) 			
+							ps.setBinaryStream(1, wdlBytes) 
+							ps.executeUpdate()
+						}
+						sql.close()
+					}
+					]]>
+				</groovy>
 			</then>
 			</if>
 		</sequential>

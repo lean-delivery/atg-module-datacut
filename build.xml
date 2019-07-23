@@ -39,7 +39,7 @@
 				<fixAdminPasswords schema="@{schema.name}" /> 
 				<removeIncompletedProjects schema="@{schema.name}" />
 				<updateWDL schema="@{schema.name}" /> 
-				<postActions schema="@{schema.name}" /> 
+				<postActions schema="@{schema.name}" />
 			</sequential>		
 		</for>
 	</target>
@@ -245,14 +245,14 @@
 					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/'${@{schema}.db.password}' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>					
 					<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log sqlfile=${@{schema}.db.user}.sql"/>   				
 					
-					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE_DATA:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; ${@{schema}.import.flags}"/>
+					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; ${@{schema}.import.flags}"/>
 				</then>
 				<else>
 					<property name="impdp.@{schema}" value="export ORACLE_HOME=${ORACLE_HOME};export ORACLE_SID=${db.sid};${ORACLE_HOME}/bin/impdp ${@{schema}.db.user}/'${@{schema}.db.password}' DUMPFILE=${@{schema}.dump.filename} schemas=${@{schema}.user.remap} remap_schema=${remap_schema_list} remap_tablespace=${@{schema}.tablespace.remap}:${@{schema}.tablespace} DIRECTORY=${dump.dir}"/>
 					
 					<property name="impdp.generate.sql.script.@{schema}" value="${impdp.@{schema}} logfile=generate_sql_${@{schema}.db.user}.log exclude=TABLE:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; sqlfile=${@{schema}.db.user}.sql"/>     			
 					
-					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE_DATA:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; ${@{schema}.import.flags}"/>
+					<property name="impdp.data.import.@{schema}" value="${impdp.@{schema}} logfile=import_data_${@{schema}.db.user}.log skip_unusable_indexes=YES content=DATA_ONLY exclude=TABLE:\&quot;IN \(${@{schema}.savedTablesEscaped}\)\&quot; ${@{schema}.import.flags}"/>
 				</else>
 				</if>			
 			</else>	

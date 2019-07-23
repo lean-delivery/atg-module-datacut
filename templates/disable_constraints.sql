@@ -29,7 +29,6 @@ begin
                    where c.owner = v_tbl(i)
                      and t.owner = v_tbl(i)
                      and t.table_name = c.table_name
-                     and t.iot_type is null
                      and t.temporary = 'N'
                    order by decode(c.constraint_type, 'R', 1, 'P', 2, 'U', 3, 4))
         loop

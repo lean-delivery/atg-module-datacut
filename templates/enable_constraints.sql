@@ -32,12 +32,12 @@ begin
                    order by decode(constraint_type, 'P', 1, 'U', 2, 'R', 3, 4))
         loop
             begin
-                v_sql := 'alter table ' || c.owner || '.' || c.table_name || ' enable constraint ' || c.constraint_name;
+                v_sql := 'alter table ' || c.owner || '."' || c.table_name || '" enable constraint "' || c.constraint_name || '"';
                 execute immediate v_sql;
             exception
                 when others then
                     begin
-                        v_sql := 'alter table ' || c.owner || '.' || c.table_name || ' enable novalidate constraint ' || c.constraint_name;
+                        v_sql := 'alter table ' || c.owner || '."' || c.table_name || '" enable novalidate constraint ' || c.constraint_name;
                         execute immediate v_sql;
                     exception
                         when others then
@@ -60,7 +60,7 @@ begin
                      and i.index_type <> 'LOB')
         loop
             begin
-                v_sql := 'alter index ' || c.owner || '.' || c.index_name || ' rebuild';
+                v_sql := 'alter index ' || c.owner || '."' || c.index_name || '" rebuild';
                 if c.partition_name is not null then
                     v_sql := v_sql || ' partition ' || c.partition_name;
                 end if;

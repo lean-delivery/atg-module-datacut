@@ -29,11 +29,12 @@ begin
                    where c.owner = v_tbl(i)
                      and t.owner = v_tbl(i)
                      and t.table_name = c.table_name
+                     and t.iot_type is null
                      and t.temporary = 'N'
                    order by decode(c.constraint_type, 'R', 1, 'P', 2, 'U', 3, 4))
         loop
             begin
-                v_sql := 'alter table ' || c.owner || '.' || c.table_name || ' disable constraint ' || c.constraint_name;
+                v_sql := 'alter table ' || c.owner || '."' || c.table_name || '" disable constraint "' || c.constraint_name || '"';
                 execute immediate v_sql;
             exception
                 when others then
@@ -50,7 +51,7 @@ begin
                      and index_type <> 'LOB')
         loop
             begin
-                v_sql := 'alter index ' || c.owner || '.' || c.index_name || ' unusable';
+                v_sql := 'alter index ' || c.owner || '."' || c.index_name || '" unusable';
                 execute immediate v_sql;
             exception
                 when others then

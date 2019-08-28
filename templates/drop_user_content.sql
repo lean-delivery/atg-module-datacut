@@ -73,7 +73,8 @@ EXECUTE immediate stringa;
 end; 
 end loop;
 
-EXECUTE immediate 'purge recyclebin'
-
+begin
+EXECUTE immediate 'purge recyclebin';
+end;
 end;
 /

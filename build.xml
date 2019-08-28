@@ -518,21 +518,6 @@
 						src="${datacut.templates.dir}/drop_user_content_${@{schema}.db.user}.sql"/>
 				</else>	
 				</if>
-				<!-- since Flyway table schema_version was created in lower case and can't be dropped during 'truncate_schema' step -->
-				<echo message="Dropping schema_version table in ${@{schema}.db.user}"/>
-				<sql
-					driver="oracle.jdbc.driver.OracleDriver"
-					url="${db.url}"
-					userid="${@{schema}.db.user}"
-					password="${@{schema}.db.password}"
-					classpathref="antclasspath"
-					autocommit="true" 
-					onerror="continue"
-				>
-					<![CDATA[
-						drop table "schema_version";
-					]]>
-				</sql>	
 			</then>
 		    </if>			
 		</sequential>

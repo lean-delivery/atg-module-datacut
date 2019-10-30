@@ -30,6 +30,7 @@
 				<copyDumpFromStorage schema="@{schema.name}" />
 				<verifyDumpFile schema="@{schema.name}" />
 				<generateSQLscript schema="@{schema.name}" />
+				<preActions schema="@{schema.name}" />        
 				<dropUserContent schema="@{schema.name}" />
 				<midActions schema="@{schema.name}" />
 				<runSQLScript schema="@{schema.name}" />

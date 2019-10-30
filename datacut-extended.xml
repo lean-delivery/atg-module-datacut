@@ -16,5 +16,10 @@
 		<!-- put here project specific middle (intermediate) actions (between schema dropping and dump importing); if you don't have any please leave as is -->
 	</sequential>
 </macrodef>
-	
+<macrodef name="preActions">
+	<attribute name="schema" />
+	<sequential>
+		<!-- put here project specific pre-actions (between objects  dropping ); if you don't have any please leave as is -->
+	</sequential>
+</macrodef>	
 </project>

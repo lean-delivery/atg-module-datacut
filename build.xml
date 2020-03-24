@@ -22,7 +22,7 @@
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${build.lib.dir}/ant-contrib-1.0b3.jar" />
 	<taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpath="${build.lib.dir}" />
 
-	<target name="importFromDump" depends="setPassword,-getDumpLocation">
+	<target name="importFromDump" depends="setPasswords,-getDumpLocation">
 
 		<for list="${db.schemas_to_import}" param="schema.name" delimiter=",">
 			<sequential>
@@ -45,7 +45,7 @@
 		</for>
 	</target>
 
-	<target name="exportToDump" depends="setPassword,-getDumpLocation">
+	<target name="exportToDump" depends="setPasswords,-getDumpLocation">
 
 		<for list="${db.schemas_to_export}" param="schema.name" delimiter=",">
 			<sequential>

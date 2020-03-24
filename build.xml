@@ -22,11 +22,10 @@
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${build.lib.dir}/ant-contrib-1.0b3.jar" />
 	<taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy" classpath="${build.lib.dir}" />
 
-	<target name="importFromDump" depends="-getDumpLocation">
+	<target name="importFromDump" depends="setPassword,-getDumpLocation">
 
 		<for list="${db.schemas_to_import}" param="schema.name" delimiter=",">
 			<sequential>
-				<setPasswords schema="@{schema.name}" />
 				<setImportProperties schema="@{schema.name}" />
 				<copyDumpFromStorage schema="@{schema.name}" />
 				<verifyDumpFile schema="@{schema.name}" />

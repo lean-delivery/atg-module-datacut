@@ -26,6 +26,7 @@
 
 		<for list="${db.schemas_to_import}" param="schema.name" delimiter=",">
 			<sequential>
+				<setPasswords schema="@{schema.name}" />
 				<setImportProperties schema="@{schema.name}" />
 				<copyDumpFromStorage schema="@{schema.name}" />
 				<verifyDumpFile schema="@{schema.name}" />

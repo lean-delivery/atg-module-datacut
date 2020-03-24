@@ -2,6 +2,12 @@
 <project name="datacut-extended" basedir=".">
 
 <!-- This is an example datacut-extended.xml for datacut project specific tasks. Don't delete fuke if you don't have any project specific steps -->
+<macrodef name="setPasswords">
+	<attribute name="schema" />
+	<sequential>
+		<!-- put here project specific actions to set Schemas' passwords; if you don't have any please leave as is -->
+	</sequential>
+</macrodef>	
 
 <macrodef name="postActions">
 	<attribute name="schema" />

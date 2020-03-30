@@ -590,13 +590,28 @@
 	<macrodef name="copyDumpFromStorage"> 
 		<attribute name="schema" />
 		<sequential>
-			<antcall target="-runSSHCommand">  
-				<param name="sh.host" value="${storage.server}"/>
-				<param name="sh.user" value="${storage.user}"/>
-				<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
-				<param name="ssh.command" value="rsync -a -r --delete ${storage.dump.directory}/${@{schema}.dump.filename} ${oracle.ssh.user}@${db.host}:${dump.directory}"/>
-				<param name="fail_on_error" value="true"/> 
-			</antcall>
+			<if>
+				<equals arg1="${aws.s3.download}" arg2="true" />
+				<then>
+					<echo message="Copying ${@{schema}.dump.filename} from ${aws.s3.bucket}"/>
+					<antcall target="-runSSHCommand">
+						<param name="sh.host" value="${db.host}"/>
+						<param name="sh.user" value="${oracle.ssh.user}"/>
+						<param name="keyfile" value="${oracle.ssh.key}"/>
+						<param name="ssh.command" value="aws s3api get-object --bucket ${aws.s3.bucket} --key ${@{schema}.dump.filename} outfile ${dump.directory}/${@{schema}.dump.filename}"/>
+						<param name="fail_on_error" value="true"/>
+					</antcall>
+				</then>
+				<else>
+					<antcall target="-runSSHCommand">
+						<param name="sh.host" value="${storage.server}"/>
+						<param name="sh.user" value="${storage.user}"/>
+						<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+						<param name="ssh.command" value="rsync -a -r --delete ${storage.dump.directory}/${@{schema}.dump.filename} ${oracle.ssh.user}@${db.host}:${dump.directory}"/>
+						<param name="fail_on_error" value="true"/>
+					</antcall>
+				</else>
+			</if>
 		</sequential>
 	</macrodef>
 		
@@ -763,14 +778,29 @@
 	<macrodef name="copyDumpToStorage"> 
    	<attribute name="schema" />
 	<sequential>
-		<echo message="Copying ${@{schema}.dump.filename} from ${db.host} to ${storage.server}"/>
-		<antcall target="-runSSHCommand">  
-			<param name="sh.host" value="${storage.server}"/>
-			<param name="sh.user" value="${storage.user}"/>
-			<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
-			<param name="ssh.command" value="rsync -a -r --delete ${oracle.ssh.user}@${db.host}:${dump.directory}/${@{schema}.dump.filename} ${storage.dump.directory}"/>
-			<param name="fail_on_error" value="true"/> 
-		</antcall>
+		<if>
+			<equals arg1="${aws.s3.upload}" arg2="true" />
+			<then>
+				<echo message="Copying ${@{schema}.dump.filename} from ${db.host} to ${aws.s3.bucket}"/>
+				<antcall target="-runSSHCommand">
+					<param name="sh.host" value="${db.host}"/>
+					<param name="sh.user" value="${oracle.ssh.user}"/>
+					<param name="keyfile" value="${oracle.ssh.key}"/>
+					<param name="ssh.command" value="aws s3api put-object --bucket ${aws.s3.bucket} --key ${@{schema}.dump.filename} --body ${dump.directory}/${@{schema}.dump.filename}"/>
+					<param name="fail_on_error" value="true"/>
+				</antcall>
+			</then>
+			<else>
+				<echo message="Copying ${@{schema}.dump.filename} from ${db.host} to ${storage.server}"/>
+				<antcall target="-runSSHCommand">
+					<param name="sh.host" value="${storage.server}"/>
+					<param name="sh.user" value="${storage.user}"/>
+					<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
+					<param name="ssh.command" value="rsync -a -r --delete ${oracle.ssh.user}@${db.host}:${dump.directory}/${@{schema}.dump.filename} ${storage.dump.directory}"/>
+					<param name="fail_on_error" value="true"/>
+				</antcall>
+			</else>
+		</if>
 	</sequential>
 	</macrodef>
 	

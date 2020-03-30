@@ -577,7 +577,7 @@
 		<attribute name="schema" />
 		<sequential>
 			<if>
-				<equals arg1="aws.s3.download" arg2="true" />
+				<equals arg1="${aws.s3.download}" arg2="true" />
 				<then>
 					<echo message="Copying ${@{schema}.dump.filename} from ${aws.s3.bucket}"/>
 					<antcall target="-runSSHCommand">
@@ -765,7 +765,7 @@
    	<attribute name="schema" />
 	<sequential>
 		<if>
-			<equals arg1="aws.s3.upload" arg2="true" />
+			<equals arg1="${aws.s3.upload}" arg2="true" />
 			<then>
 				<echo message="Copying ${@{schema}.dump.filename} from ${db.host} to ${aws.s3.bucket}"/>
 				<antcall target="-runSSHCommand">

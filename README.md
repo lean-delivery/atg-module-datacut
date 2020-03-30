@@ -492,6 +492,14 @@ In case remap tablespace for every schema isn't defined, common `tablespace.rema
 
 If `initial.db.import` set to `true` set `deployment.topology.file` to environment deployment topology sql file
 
+#### AWS S3 as dumps Storage
+```
+aws.s3.upload=true|false
+aws.s3.download=true|false
+aws.s3.bucket=<s3-bucket-name>
+```
+
+It is possible to store database dumps in AWS S3. Set aws.s3.upload to true to upload dumps to S3 bucket. To download dumps from S3 set aws.s3.download to true.    
 
 #### Align IDs in EPUB tables
 

@@ -580,7 +580,7 @@
 				<param name="sh.host" value="${storage.server}"/>
 				<param name="sh.user" value="${storage.user}"/>
 				<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
-				<param name="ssh.command" value="rsync -a -r --delete ${storage.dump.directory}/${@{schema}.dump.filename} ${oracle.ssh.user}@${db.host}:${dump.directory}"/>
+				<param name="ssh.command" value="rsync -a -r --delete ${storage.dump.directory}/${@{schema}.dump.filename} ${oracle.ssh.user}@${db.host}:${dump.directory} --chmod=Fo=r"/>
 				<param name="fail_on_error" value="true"/>
 			</antcall>
 		</sequential>
@@ -754,7 +754,7 @@
 			<param name="sh.host" value="${storage.server}"/>
 			<param name="sh.user" value="${storage.user}"/>
 			<param name="keyfile" value="${user.home}/.ssh/id_rsa"/>
-			<param name="ssh.command" value="rsync -a -r --delete ${oracle.ssh.user}@${db.host}:${dump.directory}/${@{schema}.dump.filename} ${storage.dump.directory}"/>
+			<param name="ssh.command" value="rsync -a -r --delete ${oracle.ssh.user}@${db.host}:${dump.directory}/${@{schema}.dump.filename} ${storage.dump.directory} --chmod=Fo=r"/>
 			<param name="fail_on_error" value="true"/>
 		</antcall>
 	</sequential>
